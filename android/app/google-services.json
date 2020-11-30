@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "936324800238",
+    "firebase_url": "https://letsjek.firebaseio.com",
+    "project_id": "letsjek",
+    "storage_bucket": "letsjek.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:936324800238:android:5296a3a8280f0541235dff",
+        "android_client_info": {
+          "package_name": "com.example.uber_clone"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "936324800238-5t6ce02nl3r19pm2015r4250kjcev0vt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrdEGjxPMc2AK7ZNZZei9m9GLUK3bYEtU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "936324800238-5t6ce02nl3r19pm2015r4250kjcev0vt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
