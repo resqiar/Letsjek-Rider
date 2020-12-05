@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class LoginPage extends StatelessWidget {
+class RegisterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +21,7 @@ class LoginPage extends StatelessWidget {
               height: 40,
             ),
             Text(
-              'Sign in as a rider',
+              'Sign up new rider\'s account',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
@@ -32,6 +32,23 @@ class LoginPage extends StatelessWidget {
               padding: EdgeInsets.all(24),
               child: Column(
                 children: [
+                  TextField(
+                    keyboardType: TextInputType.text,
+                    style: TextStyle(fontSize: 14),
+                    decoration: InputDecoration(
+                        labelText: 'Fullname',
+                        labelStyle: TextStyle(
+                          fontSize: 14,
+                        ),
+                        hintStyle: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                        hintText: 'enter your fullname'),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
                   TextField(
                     keyboardType: TextInputType.emailAddress,
                     style: TextStyle(fontSize: 14),
@@ -45,6 +62,23 @@ class LoginPage extends StatelessWidget {
                           fontSize: 12,
                         ),
                         hintText: 'yourusername@email.com'),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  TextField(
+                    keyboardType: TextInputType.phone,
+                    style: TextStyle(fontSize: 14),
+                    decoration: InputDecoration(
+                        labelText: 'Phone Number',
+                        labelStyle: TextStyle(
+                          fontSize: 14,
+                        ),
+                        hintStyle: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                        hintText: '+62xxxxxxx'),
                   ),
                   SizedBox(
                     height: 10,
@@ -75,14 +109,15 @@ class LoginPage extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(100),
                     ),
-                    child: Text('Sign in',
+                    child: Text('Sign up',
                         style: TextStyle(
+                          fontFamily: 'Bolt-Semibold',
                           color: Colors.white,
                         )),
                   ),
                   FlatButton(
                     onPressed: () {},
-                    child: Text('Dont have account yet? signup here'),
+                    child: Text('Already have an account? sign in here'),
                   ),
                 ],
               ),
