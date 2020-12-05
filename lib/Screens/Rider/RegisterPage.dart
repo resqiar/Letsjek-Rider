@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:uber_clone/Screens/Rider/LoginPage.dart';
 
 class RegisterPage extends StatelessWidget {
+  static const id = 'registerpage';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -116,7 +119,10 @@ class RegisterPage extends StatelessWidget {
                         )),
                   ),
                   FlatButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamedAndRemoveUntil(
+                          context, LoginPage.id, (route) => false);
+                    },
                     child: Text('Already have an account? sign in here'),
                   ),
                 ],

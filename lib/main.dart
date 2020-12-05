@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:uber_clone/Screens/MainPage.dart';
 import 'package:uber_clone/Screens/Rider/RegisterPage.dart';
 
 import 'Screens/Rider/LoginPage.dart';
@@ -36,7 +37,12 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.deepOrange,
         fontFamily: 'Bolt-Regular',
       ),
-      home: RegisterPage(),
+      initialRoute: LoginPage.id,
+      routes: {
+        LoginPage.id: (context) => LoginPage(),
+        RegisterPage.id: (context) => RegisterPage(),
+        MainPage.id: (context) => MainPage()
+      },
     );
   }
 }
