@@ -32,7 +32,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        primaryColor: Colors.red,
+        primaryColor: Colors.deepOrange,
+        fontFamily: 'Bolt-Regular',
       ),
       home: MainPage(),
     );
