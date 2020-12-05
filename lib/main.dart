@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:uber_clone/Screens/MainPage.dart';
+
+import 'Screens/LoginPage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final FirebaseApp app = await Firebase.initializeApp(
-    name: 'db2',
+  Firebase.initializeApp(
     options: Platform.isIOS || Platform.isMacOS
         ? FirebaseOptions(
             appId: '1:297855924061:ios:c6de2b69b03a5be8',
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         primaryColor: Colors.deepOrange,
         fontFamily: 'Bolt-Regular',
       ),
-      home: MainPage(),
+      home: LoginPage(),
     );
   }
 }
