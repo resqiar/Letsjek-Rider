@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:uber_clone/Screens/Rider/RegisterPage.dart';
+import 'package:uber_clone/widgets/SubmitFlatButton.dart';
 
 class LoginPage extends StatelessWidget {
   static const id = 'loginpage';
@@ -70,20 +71,7 @@ class LoginPage extends StatelessWidget {
                   SizedBox(
                     height: 30,
                   ),
-                  FlatButton(
-                    height: 40,
-                    minWidth: 300,
-                    onPressed: () {},
-                    color: Colors.green,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: Text('Sign in',
-                        style: TextStyle(
-                          fontFamily: 'Bolt-Semibold',
-                          color: Colors.white,
-                        )),
-                  ),
+                  SubmitFlatButton('Sign in', Colors.green, () {}),
                   FlatButton(
                     onPressed: () {
                       Navigator.pushNamedAndRemoveUntil(
