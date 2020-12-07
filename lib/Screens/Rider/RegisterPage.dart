@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:uber_clone/Screens/Rider/LoginPage.dart';
 import 'package:uber_clone/widgets/SubmitFlatButton.dart';
+import 'package:connectivity/connectivity.dart';
 
 class RegisterPage extends StatefulWidget {
   static const id = 'registerpage';
@@ -52,6 +53,8 @@ class _RegisterPageState extends State<RegisterPage> {
       showSnackbar(e.toString());
     }
   }
+
+  // Snackbar
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -172,8 +175,16 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(
                     height: 30,
                   ),
-                  SubmitFlatButton("Sign up", Colors.green, () {
+                  SubmitFlatButton("Sign up", Colors.green, () async {
                     // check network validation
+                    final connectivityResult =
+                        await Connectivity().checkConnectivity();
+                    if (connectivityResult != ConnectivityResult.mobile &&
+                        connectivityResult != ConnectivityResult.wifi) {
+                      showSnackbar(
+                          'Check your internet connection and try again');
+                      return;
+                    }
 
                     // check everything is fil
                     if (fullnameController.text.isEmpty ||
