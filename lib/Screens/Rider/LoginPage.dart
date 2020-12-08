@@ -1,6 +1,7 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:uber_clone/Screens/Rider/RegisterPage.dart';
 import 'package:uber_clone/widgets/SubmitFlatButton.dart';
 
@@ -17,25 +18,23 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   void loginUser() async {
-    final FirebaseAuth _auth = FirebaseAuth.instance;
-
     try {
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
-          email: emailController.text, password: passwordController.text);
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: emailController.text, password: passwordController.text);
 
       // if there is no error push user to mainpage
       Navigator.pushNamedAndRemoveUntil(context, 'mainpage', (route) => false);
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseException catch (e) {
       if (e.code == 'user-not-found') {
         showSnackbar('No user found for that email');
       } else if (e.code == 'wrong-password') {
         showSnackbar('Wrong password provided');
       }
-    } catch (e) {
-      showSnackbar(e.toString());
     }
   }
 
+  // snackbar setup
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   void showSnackbar(String messages) {

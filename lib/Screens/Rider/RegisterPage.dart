@@ -43,7 +43,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
       // if everything is okay then push user to MainPage
       Navigator.pushNamedAndRemoveUntil(context, 'mainpage', (route) => false);
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseException catch (e) {
       if (e.code == 'weak-password') {
         showSnackbar("Password too weak");
       } else if (e.code == 'email-already-in-use') {
