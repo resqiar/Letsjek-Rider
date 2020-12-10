@@ -50,15 +50,19 @@ class _RegisterPageState extends State<RegisterPage> {
       dbRef.set(userDataMap);
 
       // if everything is okay then push user to MainPage
-      Navigator.pop(context);
       Navigator.pushNamedAndRemoveUntil(context, 'mainpage', (route) => false);
     } on FirebaseException catch (e) {
+      // if there is an error - hide loading screen - show error snackbar
       Navigator.pop(context);
+
+      // show error from firebase callback code
       if (e.code == 'weak-password') {
         showSnackbar("Password too weak");
       } else if (e.code == 'email-already-in-use') {
         showSnackbar("Email already registered");
       }
+    } catch (e) {
+      showSnackbar(e.toString());
     }
   }
 

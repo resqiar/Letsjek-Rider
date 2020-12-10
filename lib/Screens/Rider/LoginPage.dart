@@ -32,16 +32,16 @@ class _LoginPageState extends State<LoginPage> {
               email: emailController.text, password: passwordController.text);
 
       // if there is no error push user to mainpage
-      Navigator.pop(context);
       Navigator.pushNamedAndRemoveUntil(context, 'mainpage', (route) => false);
     } on FirebaseException catch (e) {
-      // dismiss loading bar
+      // if there is an error - hide loading screen - show error snackbar
       Navigator.pop(context);
 
+      // show error from firebase callback code
       if (e.code == 'user-not-found') {
         showSnackbar('No user found for that email');
       } else if (e.code == 'wrong-password') {
-        showSnackbar('Wrong password provided');
+        showSnackbar('Wrong email or password, try again');
       }
     } catch (e) {
       showSnackbar(e.toString());
