@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:uber_clone/Screens/Rider/LoginPage.dart';
+import 'package:uber_clone/widgets/ProgressDialogue.dart';
 import 'package:uber_clone/widgets/SubmitFlatButton.dart';
 import 'package:connectivity/connectivity.dart';
 
@@ -22,6 +23,13 @@ class _RegisterPageState extends State<RegisterPage> {
   final passController = TextEditingController();
 
   void registerUser() async {
+    // show loading circular bar
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => ProgressDialogue("Please wait..."),
+    );
+
     try {
       UserCredential user = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(
@@ -42,15 +50,15 @@ class _RegisterPageState extends State<RegisterPage> {
       dbRef.set(userDataMap);
 
       // if everything is okay then push user to MainPage
+      Navigator.pop(context);
       Navigator.pushNamedAndRemoveUntil(context, 'mainpage', (route) => false);
     } on FirebaseException catch (e) {
+      Navigator.pop(context);
       if (e.code == 'weak-password') {
         showSnackbar("Password too weak");
       } else if (e.code == 'email-already-in-use') {
         showSnackbar("Email already registered");
       }
-    } catch (e) {
-      showSnackbar(e.toString());
     }
   }
 

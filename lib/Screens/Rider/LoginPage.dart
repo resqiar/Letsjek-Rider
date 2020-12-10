@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:uber_clone/Screens/Rider/RegisterPage.dart';
+import 'package:uber_clone/widgets/ProgressDialogue.dart';
 import 'package:uber_clone/widgets/SubmitFlatButton.dart';
 
 class LoginPage extends StatefulWidget {
@@ -18,19 +19,32 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
 
   void loginUser() async {
+    // show loading circular bar
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) => ProgressDialogue('Please wait...'),
+    );
+
     try {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(
               email: emailController.text, password: passwordController.text);
 
       // if there is no error push user to mainpage
+      Navigator.pop(context);
       Navigator.pushNamedAndRemoveUntil(context, 'mainpage', (route) => false);
     } on FirebaseException catch (e) {
+      // dismiss loading bar
+      Navigator.pop(context);
+
       if (e.code == 'user-not-found') {
         showSnackbar('No user found for that email');
       } else if (e.code == 'wrong-password') {
         showSnackbar('Wrong password provided');
       }
+    } catch (e) {
+      showSnackbar(e.toString());
     }
   }
 
