@@ -32,7 +32,68 @@ class _MainPageState extends State<MainPage> {
               _controller.complete(controller);
               mapController = controller;
             },
-          )
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.4,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(16),
+                  topRight: Radius.circular(16),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 18.0,
+                    spreadRadius: 0.8,
+                    offset: Offset(0.8, 0.8),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 8),
+                    Text('Nice to see you!', style: TextStyle(fontSize: 12)),
+                    Text(
+                      'Where are you going?',
+                      style:
+                          TextStyle(fontFamily: 'Bolt-Semibold', fontSize: 18),
+                    ),
+                    SizedBox(height: 16),
+                    Container(
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(100),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 0.8,
+                            spreadRadius: 0.5,
+                            offset: Offset(0.5, 0.5),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.search, color: Colors.grey),
+                          SizedBox(width: 8),
+                          Text('Search Destination...')
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
