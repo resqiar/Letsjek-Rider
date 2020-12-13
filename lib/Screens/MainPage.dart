@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:uber_clone/widgets/ListDivider.dart';
 
 class MainPage extends StatefulWidget {
   static const id = 'mainpage';
@@ -38,7 +39,7 @@ class _MainPageState extends State<MainPage> {
             right: 0,
             bottom: 0,
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.4,
+              height: MediaQuery.of(context).size.height * 0.35,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -85,10 +86,77 @@ class _MainPageState extends State<MainPage> {
                         children: [
                           Icon(Icons.search, color: Colors.grey),
                           SizedBox(width: 8),
-                          Text('Search Destination...')
+                          Text(
+                            'Search Destination...',
+                            style: TextStyle(color: Colors.grey),
+                          ),
                         ],
                       ),
-                    )
+                    ),
+                    SizedBox(
+                      height: 18,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: Row(
+                        children: [
+                          Icon(Icons.home_outlined, color: Colors.grey),
+                          SizedBox(
+                            width: 12,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Home',
+                                style: TextStyle(
+                                  fontFamily: 'Bolt-Semibold',
+                                ),
+                              ),
+                              Text(
+                                'Your home address',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 12,
+                    ),
+                    ListDivider(),
+                    SizedBox(
+                      height: 12,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.only(left: 10, right: 10),
+                      child: Row(
+                        children: [
+                          Icon(Icons.work_outline, color: Colors.grey),
+                          SizedBox(
+                            width: 12,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Work',
+                                style: TextStyle(fontFamily: 'Bolt-Semibold'),
+                              ),
+                              Text(
+                                'Your workspace address',
+                                style:
+                                    TextStyle(fontSize: 12, color: Colors.grey),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
