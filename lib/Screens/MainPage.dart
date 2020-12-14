@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
 
@@ -12,6 +13,19 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // ! GeoLocator Get Current Position
+  Position currentPosition;
+
+  void getCurrentPos() async {
+    Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.bestForNavigation);
+    currentPosition = pos;
+
+    LatLng coords = LatLng(pos.latitude, pos.longitude);
+    CameraPosition mapsCamera = CameraPosition(target: coords, zoom: 18);
+    mapController.animateCamera(CameraUpdate.newCameraPosition(mapsCamera));
+  }
 
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
@@ -116,11 +130,17 @@ class _MainPageState extends State<MainPage> {
               right: 8,
             ),
             mapType: MapType.normal,
+            myLocationEnabled: true,
+            zoomControlsEnabled: true,
+            zoomGesturesEnabled: true,
             myLocationButtonEnabled: true,
             initialCameraPosition: _kGooglePlex,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
               mapController = controller;
+
+              // ! After map ready bind user's current locations
+              getCurrentPos();
             },
           ),
           Positioned(
