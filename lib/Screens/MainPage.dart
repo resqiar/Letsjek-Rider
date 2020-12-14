@@ -11,6 +11,8 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   static final CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(37.42796133580664, -122.085749655962),
     zoom: 14.4746,
@@ -23,6 +25,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       drawer: Container(
         width: MediaQuery.of(context).size.width * 0.8,
         child: Drawer(
@@ -119,6 +122,31 @@ class _MainPageState extends State<MainPage> {
               _controller.complete(controller);
               mapController = controller;
             },
+          ),
+          Positioned(
+            top: 35,
+            left: 16,
+            child: GestureDetector(
+              onTap: () {
+                _scaffoldKey.currentState.openDrawer();
+              },
+              child: Container(
+                padding: EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      spreadRadius: 1.5,
+                      blurRadius: 0.5,
+                      offset: Offset(0.5, 0.5),
+                    ),
+                  ],
+                ),
+                child: Icon(Icons.menu),
+              ),
+            ),
           ),
           Positioned(
             left: 0,
