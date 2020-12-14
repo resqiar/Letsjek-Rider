@@ -125,7 +125,7 @@ class _MainPageState extends State<MainPage> {
           ),
           Positioned(
             top: 35,
-            left: 16,
+            left: 12,
             child: GestureDetector(
               onTap: () {
                 _scaffoldKey.currentState.openDrawer();
