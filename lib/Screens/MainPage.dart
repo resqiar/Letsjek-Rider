@@ -23,6 +23,87 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: Container(
+        width: MediaQuery.of(context).size.width * 0.8,
+        child: Drawer(
+          // Add a ListView to the drawer. This ensures the user can scroll
+          // through the options in the drawer if there isn't enough vertical
+          // space to fit everything.
+          child: ListView(
+            children: [
+              Container(
+                height: 150,
+                color: Colors.greenAccent,
+                padding: EdgeInsets.all(8),
+                child: DrawerHeader(
+                  child: Row(
+                    children: [
+                      Image.asset(
+                        'resources/images/user_icon.png',
+                        height: 55,
+                        width: 55,
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Admin',
+                              style: TextStyle(
+                                fontFamily: 'Bolt-Semibold',
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 2,
+                            ),
+                            Text(
+                              'View profile',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              ListDivider(),
+              SizedBox(
+                height: 12,
+              ),
+              ListTile(
+                leading: Icon(Icons.motorcycle_outlined),
+                title: Text('Free Rides'),
+              ),
+              ListTile(
+                leading: Icon(Icons.payment_outlined),
+                title: Text('Payments'),
+              ),
+              ListTile(
+                leading: Icon(Icons.history),
+                title: Text('Ride History'),
+              ),
+              ListTile(
+                leading: Icon(Icons.support_agent_outlined),
+                title: Text('Support'),
+              ),
+              ListTile(
+                leading: Icon(Icons.info_outline),
+                title: Text('About'),
+              ),
+            ],
+          ),
+        ),
+      ),
       body: Stack(
         children: [
           GoogleMap(
