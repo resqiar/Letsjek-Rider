@@ -26,6 +26,11 @@ class _MainPageState extends State<MainPage> {
       body: Stack(
         children: [
           GoogleMap(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).size.height * 0.35,
+              left: 8,
+              right: 8,
+            ),
             mapType: MapType.normal,
             myLocationButtonEnabled: true,
             initialCameraPosition: _kGooglePlex,
