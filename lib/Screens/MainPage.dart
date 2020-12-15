@@ -27,9 +27,9 @@ class _MainPageState extends State<MainPage> {
     mapController.animateCamera(CameraUpdate.newCameraPosition(mapsCamera));
   }
 
-  static final CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(37.42796133580664, -122.085749655962),
-    zoom: 14.4746,
+  static final CameraPosition _defaultLocation = CameraPosition(
+    target: LatLng(-6.200000, 106.816666),
+    zoom: 8,
   );
 
   // Google map controller
@@ -125,16 +125,17 @@ class _MainPageState extends State<MainPage> {
         children: [
           GoogleMap(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).size.height * 0.35,
+              bottom: MediaQuery.of(context).size.height * 0.39,
               left: 8,
               right: 8,
+              top: 18,
             ),
             mapType: MapType.normal,
             myLocationEnabled: true,
             zoomControlsEnabled: true,
             zoomGesturesEnabled: true,
             myLocationButtonEnabled: true,
-            initialCameraPosition: _kGooglePlex,
+            initialCameraPosition: _defaultLocation,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
               mapController = controller;
@@ -144,7 +145,7 @@ class _MainPageState extends State<MainPage> {
             },
           ),
           Positioned(
-            top: 35,
+            top: 30,
             left: 12,
             child: GestureDetector(
               onTap: () {
@@ -173,7 +174,7 @@ class _MainPageState extends State<MainPage> {
             right: 0,
             bottom: 0,
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.35,
+              height: MediaQuery.of(context).size.height * 0.38,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
