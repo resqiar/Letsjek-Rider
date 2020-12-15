@@ -11,7 +11,7 @@ class ProgressDialogue extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       backgroundColor: Colors.transparent,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.2,
+        height: MediaQuery.of(context).size.height * 0.3,
         width: double.infinity,
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -21,6 +21,7 @@ class ProgressDialogue extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
                 height: 10,

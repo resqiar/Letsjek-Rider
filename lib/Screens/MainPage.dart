@@ -14,17 +14,51 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  // SNACKBAR
+  void showSnackbar(String messages) {
+    final snackbar = SnackBar(
+      content: Text(
+        messages,
+        textAlign: TextAlign.center,
+        style: TextStyle(fontSize: 18, fontFamily: 'Bolt-Semibold'),
+      ),
+    );
+
+    _scaffoldKey.currentState.showSnackBar(snackbar);
+  }
+
   // ! GeoLocator Get Current Position
   Position currentPosition;
 
   void getCurrentPos() async {
-    Position pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.bestForNavigation);
-    currentPosition = pos;
+    bool serviceEnabled;
+    LocationPermission locPermit;
 
-    LatLng coords = LatLng(pos.latitude, pos.longitude);
-    CameraPosition mapsCamera = CameraPosition(target: coords, zoom: 18);
-    mapController.animateCamera(CameraUpdate.newCameraPosition(mapsCamera));
+    // check if service enabled or not
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      // Get user to turn on his GPS services
+      locPermit = await Geolocator.requestPermission();
+    }
+
+    // check if apps denied service permanently
+    locPermit = await Geolocator.checkPermission();
+    if (locPermit == LocationPermission.deniedForever) {
+      return showSnackbar('Location services are disabled permanently');
+    }
+
+    try {
+      // get current users location
+      Position pos = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.bestForNavigation);
+      currentPosition = pos;
+
+      LatLng coords = LatLng(pos.latitude, pos.longitude);
+      CameraPosition mapsCamera = CameraPosition(target: coords, zoom: 18);
+      mapController.animateCamera(CameraUpdate.newCameraPosition(mapsCamera));
+    } catch (e) {
+      showSnackbar(e.toString());
+    }
   }
 
   static final CameraPosition _defaultLocation = CameraPosition(
