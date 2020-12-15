@@ -162,7 +162,7 @@ class _MainPageState extends State<MainPage> {
               bottom: MediaQuery.of(context).size.height * 0.39,
               left: 8,
               right: 8,
-              top: 18,
+              top: MediaQuery.of(context).size.height * 0.1,
             ),
             mapType: MapType.normal,
             myLocationEnabled: true,
@@ -179,7 +179,7 @@ class _MainPageState extends State<MainPage> {
             },
           ),
           Positioned(
-            top: 30,
+            top: 35,
             left: 12,
             child: GestureDetector(
               onTap: () {
@@ -199,7 +199,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ],
                 ),
-                child: Icon(Icons.menu),
+                child: Icon(Icons.keyboard_arrow_right),
               ),
             ),
           ),
