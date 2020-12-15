@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:uber_clone/helpers/HttpRequestMethod.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
 
 class MainPage extends StatefulWidget {
@@ -56,6 +57,10 @@ class _MainPageState extends State<MainPage> {
       LatLng coords = LatLng(pos.latitude, pos.longitude);
       CameraPosition mapsCamera = CameraPosition(target: coords, zoom: 18);
       mapController.animateCamera(CameraUpdate.newCameraPosition(mapsCamera));
+
+      // GEOCODE
+      String address = await HttpRequestMethod.findAddressByCoord(pos);
+      print(address);
     } catch (e) {
       showSnackbar(e.toString());
     }
