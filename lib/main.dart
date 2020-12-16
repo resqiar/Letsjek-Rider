@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:uber_clone/Screens/MainPage.dart';
 import 'package:uber_clone/Screens/Rider/RegisterPage.dart';
+import 'package:uber_clone/provider/AppData.dart';
 
 import 'Screens/Rider/LoginPage.dart';
 
@@ -32,17 +34,20 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primaryColor: Colors.green,
-        fontFamily: 'Bolt-Regular',
+    return ChangeNotifierProvider(
+      create: (context) => AppData(),
+      child: MaterialApp(
+        theme: ThemeData(
+          primaryColor: Colors.green,
+          fontFamily: 'Bolt-Regular',
+        ),
+        initialRoute: LoginPage.id,
+        routes: {
+          LoginPage.id: (context) => LoginPage(),
+          RegisterPage.id: (context) => RegisterPage(),
+          MainPage.id: (context) => MainPage()
+        },
       ),
-      initialRoute: LoginPage.id,
-      routes: {
-        LoginPage.id: (context) => LoginPage(),
-        RegisterPage.id: (context) => RegisterPage(),
-        MainPage.id: (context) => MainPage()
-      },
     );
   }
 }

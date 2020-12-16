@@ -59,8 +59,7 @@ class _MainPageState extends State<MainPage> {
       mapController.animateCamera(CameraUpdate.newCameraPosition(mapsCamera));
 
       // GEOCODE
-      String address = await HttpRequestMethod.findAddressByCoord(pos);
-      print(address);
+      String address = await HttpRequestMethod.findAddressByCoord(pos, context);
     } catch (e) {
       showSnackbar(e.toString());
     }
