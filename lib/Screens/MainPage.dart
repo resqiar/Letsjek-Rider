@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:uber_clone/Screens/SearchPage.dart';
 import 'package:uber_clone/helpers/HttpRequestMethod.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
 
@@ -241,29 +242,37 @@ class _MainPageState extends State<MainPage> {
                           TextStyle(fontFamily: 'Bolt-Semibold', fontSize: 18),
                     ),
                     SizedBox(height: 16),
-                    Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(100),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 0.8,
-                            spreadRadius: 0.5,
-                            offset: Offset(0.5, 0.5),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.search, color: Colors.grey),
-                          SizedBox(width: 8),
-                          Text(
-                            'Search Destination...',
-                            style: TextStyle(color: Colors.grey),
-                          ),
-                        ],
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SearchPage()));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(100),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 0.8,
+                              spreadRadius: 0.5,
+                              offset: Offset(0.5, 0.5),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(Icons.search, color: Colors.grey),
+                            SizedBox(width: 8),
+                            Text(
+                              'Search Destination...',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     SizedBox(
