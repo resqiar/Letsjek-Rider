@@ -8,8 +8,16 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  var pickupTextController = TextEditingController();
+  var destTextController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
+    // address from AppData
+    String address =
+        Provider.of<AppData>(context).pickupPoint.formattedAddress ?? '';
+    pickupTextController.text = address;
+
     return Scaffold(
       body: Column(
         children: [
@@ -79,15 +87,10 @@ class _SearchPageState extends State<SearchPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: TextField(
+                              controller: pickupTextController,
                               readOnly: true,
                               decoration: InputDecoration(
-                                hintText: (Provider.of<AppData>(context)
-                                            .pickupPoint !=
-                                        null)
-                                    ? Provider.of<AppData>(context)
-                                        .pickupPoint
-                                        .formattedAddress
-                                    : 'Unable to reach your locations',
+                                hintText: 'Pickup Location',
                                 filled: true,
                                 border: InputBorder.none,
                                 contentPadding:
@@ -121,6 +124,7 @@ class _SearchPageState extends State<SearchPage> {
                           child: Padding(
                             padding: const EdgeInsets.all(2.0),
                             child: TextField(
+                              controller: destTextController,
                               autofocus: true,
                               decoration: InputDecoration(
                                 hintText: 'Where to?',
