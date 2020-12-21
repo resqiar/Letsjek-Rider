@@ -26,7 +26,7 @@ class HttpRequestMethod {
       address = response['display_name'];
 
       // pass data to Models so it can be updated in AppData.dart
-      Address addressModel = new Address();
+      Address addressModel = Address();
       addressModel.latitude = coord.latitude;
       addressModel.longitude = coord.longitude;
       addressModel.formattedAddress = address;

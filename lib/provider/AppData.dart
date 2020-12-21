@@ -13,5 +13,16 @@ class AppData extends ChangeNotifier {
     this.pickupPoint = point;
     notifyListeners();
   }
+
   /******************************************/
+
+  /******************************************/
+  // Save user destination point
+  Address destPoint;
+
+  // method to save and update destPoint
+  void updateDestPoint(Address point) {
+    this.destPoint = point;
+    notifyListeners();
+  }
 }
