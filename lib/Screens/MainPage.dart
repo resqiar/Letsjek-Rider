@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -31,6 +32,10 @@ class _MainPageState extends State<MainPage> {
 
     _scaffoldKey.currentState.showSnackBar(snackbar);
   }
+
+  // ? Routes Coordinate Polylines
+  List<LatLng> polylineCoords = [];
+  Set<Polyline> _polylines = {};
 
   // ! GeoLocator Get Current Position
   Position currentPosition;
@@ -177,6 +182,7 @@ class _MainPageState extends State<MainPage> {
             zoomControlsEnabled: true,
             zoomGesturesEnabled: true,
             myLocationButtonEnabled: true,
+            polylines: _polylines,
             initialCameraPosition: _defaultLocation,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
@@ -380,10 +386,65 @@ class _MainPageState extends State<MainPage> {
     var getRoutes =
         await HttpRequestMethod.findRoutes(pickupLatLng, destLatLng);
 
-    // DELETE LOADING SCREEN
-    print(getRoutes.destDuration);
+    // !: RENDER ROUTES :!
+    PolylinePoints polylinePoints = PolylinePoints();
+    List<PointLatLng> result =
+        polylinePoints.decodePolyline(getRoutes.encodedPoints);
+
+    // clear available RESULT first
+    polylineCoords.clear();
+
+    if (result.isNotEmpty) {
+      // LOOP RESULT + ADD to LIST
+      result.forEach((PointLatLng points) {
+        polylineCoords.add(LatLng(points.latitude, points.longitude));
+      });
+    }
+
+    // PROPERTY of POLYLINE
+    // clear available polyline first
+    _polylines.clear();
+
+    setState(() {
+      Polyline polyline = Polyline(
+        polylineId: PolylineId('routes'),
+        color: Colors.purple,
+        points: polylineCoords,
+        jointType: JointType.round,
+        width: 4,
+        startCap: Cap.roundCap,
+        endCap: Cap.roundCap,
+        geodesic: true,
+      );
+
+      // add to Set
+      _polylines.add(polyline);
+    });
 
     // DISMISS LOADING
     Navigator.pop(context);
+
+    // ANIMATE MAPS CAMERA
+    LatLngBounds bounds;
+
+    if (pickupLatLng.latitude > destLatLng.latitude &&
+        pickupLatLng.longitude > destLatLng.longitude) {
+      bounds = LatLngBounds(southwest: destLatLng, northeast: pickupLatLng);
+    } else if (pickupLatLng.latitude > destLatLng.latitude) {
+      bounds = LatLngBounds(
+        southwest: LatLng(destLatLng.latitude, pickupLatLng.longitude),
+        northeast: LatLng(pickupLatLng.latitude, destLatLng.longitude),
+      );
+    } else if (pickupLatLng.longitude > destLatLng.longitude) {
+      bounds = LatLngBounds(
+        southwest: LatLng(pickupLatLng.latitude, destLatLng.longitude),
+        northeast: LatLng(destLatLng.latitude, pickupLatLng.longitude),
+      );
+    } else {
+      bounds = LatLngBounds(southwest: pickupLatLng, northeast: destLatLng);
+    }
+
+    // UPDATE CAMERA
+    mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
   }
 }
