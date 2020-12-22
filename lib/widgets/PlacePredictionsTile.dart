@@ -21,8 +21,10 @@ class PlacePredictionsTile extends StatelessWidget {
     selectedPlace.longitude = double.parse(predictionsPlace.longitude);
 
     // UPDATE PROVIDER
-    Provider.of<AppData>(context, listen: false)
-        .updatePickupPoint(selectedPlace);
+    Provider.of<AppData>(context, listen: false).updateDestPoint(selectedPlace);
+
+    // ! CLOSE THIS SCREEN WITH TRIGGER
+    Navigator.pop(context, "getroutesnow");
   }
 
   @override

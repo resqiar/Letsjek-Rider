@@ -1,9 +1,12 @@
 import 'package:connectivity/connectivity.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uber_clone/helpers/HttpReqHelper.dart';
 import 'package:uber_clone/models/Address.dart';
+import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
+import 'package:uber_clone/global.dart' as global;
 
 class HttpRequestMethod {
   static Future findAddressByCoord(Position coord, context) async {
@@ -37,5 +40,27 @@ class HttpRequestMethod {
     }
 
     return address;
+  }
+
+  static Future<Routes> findRoutes(LatLng pickupPoint, LatLng destPoint) async {
+    // Get Response
+    var URL =
+        "https://us1.locationiq.com/v1/directions/driving/${pickupPoint.longitude},${pickupPoint.latitude};${destPoint.longitude},${destPoint.latitude}?key=${global.locationIQKeys}&overview=full";
+
+    var response = await HttpReqHelper.getRequest(URL);
+
+    // if response failed
+    if (response == 'failed') return null;
+
+    // assign value to Model
+    Routes routesModels = Routes();
+
+    routesModels.destDistance =
+        (response["routes"][0]["distance"] / 1000).round();
+    routesModels.destDuration =
+        (response["routes"][0]["duration"] / 60).round();
+    routesModels.encodedPoints = response["routes"][0]["geometry"];
+
+    return routesModels;
   }
 }

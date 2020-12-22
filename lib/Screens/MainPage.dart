@@ -2,9 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 import 'package:uber_clone/Screens/SearchPage.dart';
 import 'package:uber_clone/helpers/HttpRequestMethod.dart';
+import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
+import 'package:uber_clone/widgets/ProgressDialogue.dart';
 
 class MainPage extends StatefulWidget {
   static const id = 'mainpage';
@@ -243,11 +246,20 @@ class _MainPageState extends State<MainPage> {
                     ),
                     SizedBox(height: 16),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.push(
+                      onTap: () async {
+                        var response = await Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => SearchPage()));
+
+                        // ! WHEN USER CAME BACK FROM SEARCH || IT CARRY A TRIGGER
+                        // ? What Trigger?
+                        // Basically this trigger is going on to activate getRoutes() method
+                        // to actually run the data that user has chosen in search page
+                        // when user came back from search page, its expected to render the routes
+                        if (response == 'getroutesnow') {
+                          await getRoutes();
+                        }
                       },
                       child: Container(
                         padding: EdgeInsets.all(10),
@@ -347,5 +359,31 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
     );
+  }
+
+  Future getRoutes() async {
+    // GLOBAL PICKUP AND DESTINATION POINT
+    var pickupPoint = Provider.of<AppData>(context, listen: false).pickupPoint;
+    var destPoint = Provider.of<AppData>(context, listen: false).destPoint;
+
+    var pickupLatLng = LatLng(pickupPoint.latitude, pickupPoint.longitude);
+    var destLatLng = LatLng(destPoint.latitude, destPoint.longitude);
+
+    // SHOW LOADING SCREEN FIRST
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => ProgressDialogue("Please wait..."),
+    );
+
+    // CALL THE HELPER METHOD TO GET ROUTES/DETAILS
+    var getRoutes =
+        await HttpRequestMethod.findRoutes(pickupLatLng, destLatLng);
+
+    // DELETE LOADING SCREEN
+    print(getRoutes.encodedPoints);
+
+    // DISMISS LOADING
+    Navigator.pop(context);
   }
 }
