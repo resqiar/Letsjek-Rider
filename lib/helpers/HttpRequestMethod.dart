@@ -55,10 +55,11 @@ class HttpRequestMethod {
     // assign value to Model
     Routes routesModels = Routes();
 
-    routesModels.destDistance =
-        (response["routes"][0]["distance"] / 1000).round();
+    routesModels.destDistanceM = response["routes"][0]["distance"].toString();
+    routesModels.destDistanceKM =
+        (response["routes"][0]["distance"] / 1000).round().toStringAsFixed(0);
     routesModels.destDuration =
-        (response["routes"][0]["duration"] / 60).round();
+        (response["routes"][0]["duration"] / 60).round().toStringAsFixed(0);
     routesModels.encodedPoints = response["routes"][0]["geometry"];
 
     return routesModels;

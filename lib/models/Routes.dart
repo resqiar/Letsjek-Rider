@@ -1,10 +1,12 @@
 class Routes {
-  int destDistance;
-  int destDuration;
+  String destDistanceM;
+  String destDistanceKM;
+  String destDuration;
   String encodedPoints;
 
   Routes({
-    this.destDistance,
+    this.destDistanceM,
+    this.destDistanceKM,
     this.destDuration,
     this.encodedPoints,
   });

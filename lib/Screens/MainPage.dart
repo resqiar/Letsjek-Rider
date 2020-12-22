@@ -381,7 +381,7 @@ class _MainPageState extends State<MainPage> {
         await HttpRequestMethod.findRoutes(pickupLatLng, destLatLng);
 
     // DELETE LOADING SCREEN
-    print(getRoutes.encodedPoints);
+    print(getRoutes.destDuration);
 
     // DISMISS LOADING
     Navigator.pop(context);
