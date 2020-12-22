@@ -36,6 +36,8 @@ class _MainPageState extends State<MainPage> {
   // ? Routes Coordinate Polylines
   List<LatLng> polylineCoords = [];
   Set<Polyline> _polylines = {};
+  Set<Marker> _marker = {};
+  Set<Circle> _circle = {};
 
   // ! GeoLocator Get Current Position
   Position currentPosition;
@@ -183,6 +185,8 @@ class _MainPageState extends State<MainPage> {
             zoomGesturesEnabled: true,
             myLocationButtonEnabled: true,
             polylines: _polylines,
+            markers: _marker,
+            circles: _circle,
             initialCameraPosition: _defaultLocation,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
@@ -446,5 +450,52 @@ class _MainPageState extends State<MainPage> {
 
     // UPDATE CAMERA
     mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
+
+    // ADD A MARKER
+    Marker pickupMarker = Marker(
+      markerId: MarkerId('pickup'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+      infoWindow: InfoWindow(
+        title: pickupPoint.formattedAddress,
+        snippet: 'Lat: ${pickupPoint.latitude}; Lng: ${pickupPoint.longitude}',
+      ),
+      position: pickupLatLng,
+    );
+
+    Marker destMarker = Marker(
+      markerId: MarkerId('dest'),
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+      infoWindow: InfoWindow(
+        title: destPoint.formattedAddress,
+        snippet: 'Lat: ${destPoint.latitude};Lng: ${destPoint.longitude}',
+      ),
+      position: destLatLng,
+    );
+
+    // ADD a CIRCLE
+    Circle pickupCircle = Circle(
+      circleId: CircleId('pickup'),
+      center: pickupLatLng,
+      strokeWidth: 3,
+      radius: 12,
+      strokeColor: Colors.green,
+      fillColor: Colors.greenAccent,
+    );
+
+    Circle destCircle = Circle(
+      circleId: CircleId('dest'),
+      center: destLatLng,
+      strokeWidth: 3,
+      radius: 8,
+      strokeColor: Colors.red,
+      fillColor: Colors.redAccent,
+    );
+
+    setState(() {
+      _marker.add(pickupMarker);
+      _marker.add(destMarker);
+      _circle.add(pickupCircle);
+      _circle.add(destCircle);
+    });
   }
 }
