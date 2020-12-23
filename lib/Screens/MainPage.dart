@@ -9,6 +9,7 @@ import 'package:uber_clone/helpers/HttpRequestMethod.dart';
 import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
 import 'package:uber_clone/widgets/ProgressDialogue.dart';
+import 'package:uber_clone/widgets/SubmitFlatButton.dart';
 
 class MainPage extends StatefulWidget {
   static const id = 'mainpage';
@@ -17,7 +18,7 @@ class MainPage extends StatefulWidget {
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // SNACKBAR
@@ -84,6 +85,21 @@ class _MainPageState extends State<MainPage> {
   // Google map controller
   Completer<GoogleMapController> _controller = Completer();
   GoogleMapController mapController;
+
+  // HEIGHT OF THE SHEET
+  bool searchSheetHigh = true;
+  bool requestSheetHigh = false;
+
+  void showRequestSheet() async {
+    // GET ROUTES
+    await getRoutes();
+
+    // SHOW SHEET
+    setState(() {
+      searchSheetHigh = false;
+      requestSheetHigh = true;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -225,143 +241,264 @@ class _MainPageState extends State<MainPage> {
             left: 0,
             right: 0,
             bottom: 0,
-            child: Container(
-              height: MediaQuery.of(context).size.height * 0.38,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 18.0,
-                    spreadRadius: 0.8,
-                    offset: Offset(0.8, 0.8),
+            child: AnimatedSize(
+              vsync: this,
+              duration: Duration(milliseconds: 200),
+              curve: Curves.easeIn,
+              child: Container(
+                height: (searchSheetHigh == true)
+                    ? MediaQuery.of(context).size.height * 0.38
+                    : 0,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
-                ],
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 8),
-                    Text('Nice to see you!', style: TextStyle(fontSize: 12)),
-                    Text(
-                      'Where are you going?',
-                      style:
-                          TextStyle(fontFamily: 'Bolt-Semibold', fontSize: 18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 18.0,
+                      spreadRadius: 0.8,
+                      offset: Offset(0.8, 0.8),
                     ),
-                    SizedBox(height: 16),
-                    GestureDetector(
-                      onTap: () async {
-                        var response = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => SearchPage()));
+                  ],
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 8),
+                      Text('Nice to see you!', style: TextStyle(fontSize: 12)),
+                      Text(
+                        'Where are you going?',
+                        style: TextStyle(
+                            fontFamily: 'Bolt-Semibold', fontSize: 18),
+                      ),
+                      SizedBox(height: 16),
+                      GestureDetector(
+                        onTap: () async {
+                          var response = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SearchPage()));
 
-                        // ! WHEN USER CAME BACK FROM SEARCH || IT CARRY A TRIGGER
-                        // ? What Trigger?
-                        // Basically this trigger is going on to activate getRoutes() method
-                        // to actually run the data that user has chosen in search page
-                        // when user came back from search page, its expected to render the routes
-                        if (response == 'getroutesnow') {
-                          await getRoutes();
-                        }
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(100),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 0.8,
-                              spreadRadius: 0.5,
-                              offset: Offset(0.5, 0.5),
-                            ),
-                          ],
+                          // ! WHEN USER CAME BACK FROM SEARCH || IT CARRY A TRIGGER
+                          // ? What Trigger?
+                          // Basically this trigger is going on to activate getRoutes() method
+                          // to actually run the data that user has chosen in search page
+                          // when user came back from search page, its expected to render the routes
+                          if (response == 'getroutesnow') {
+                            showRequestSheet();
+                          }
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(100),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black26,
+                                blurRadius: 0.8,
+                                spreadRadius: 0.5,
+                                offset: Offset(0.5, 0.5),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.search, color: Colors.grey),
+                              SizedBox(width: 8),
+                              Text(
+                                'Search Destination...',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
                         ),
+                      ),
+                      SizedBox(
+                        height: 18,
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
                         child: Row(
                           children: [
-                            Icon(Icons.search, color: Colors.grey),
-                            SizedBox(width: 8),
+                            Icon(Icons.home_outlined, color: Colors.grey),
+                            SizedBox(
+                              width: 12,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Home',
+                                  style: TextStyle(
+                                    fontFamily: 'Bolt-Semibold',
+                                  ),
+                                ),
+                                Text(
+                                  'Your home address',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: 12,
+                      ),
+                      ListDivider(),
+                      SizedBox(
+                        height: 12,
+                      ),
+                      Container(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: Row(
+                          children: [
+                            Icon(Icons.work_outline, color: Colors.grey),
+                            SizedBox(
+                              width: 12,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Work',
+                                  style: TextStyle(fontFamily: 'Bolt-Semibold'),
+                                ),
+                                Text(
+                                  'Your workspace address',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Colors.grey),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: AnimatedSize(
+              vsync: this,
+              curve: Curves.easeIn,
+              duration: Duration(milliseconds: 200),
+              child: Container(
+                height: (requestSheetHigh == true)
+                    ? MediaQuery.of(context).size.height * 0.3
+                    : 0,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 18.0,
+                      spreadRadius: 0.8,
+                      offset: Offset(0.8, 0.8),
+                    ),
+                  ],
+                ),
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        color: Colors.green[50],
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                'resources/images/taxi.png',
+                                height: 70,
+                                width: 70,
+                              ),
+                              SizedBox(
+                                width: 8,
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Lets-Car',
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontFamily: 'Bolt-Semibold'),
+                                  ),
+                                  Text(
+                                    '7km/7245m',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Expanded(child: Container()),
+                              Text(
+                                '\$13',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontFamily: 'Bolt-Semibold',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: 12,
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.payment_outlined,
+                              color: Colors.grey,
+                            ),
+                            SizedBox(
+                              width: 4,
+                            ),
                             Text(
-                              'Search Destination...',
+                              'Cash',
                               style: TextStyle(color: Colors.grey),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      height: 18,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      child: Row(
-                        children: [
-                          Icon(Icons.home_outlined, color: Colors.grey),
-                          SizedBox(
-                            width: 12,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Home',
-                                style: TextStyle(
-                                  fontFamily: 'Bolt-Semibold',
-                                ),
-                              ),
-                              Text(
-                                'Your home address',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
+                      SizedBox(
+                        height: 12,
                       ),
-                    ),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    ListDivider(),
-                    SizedBox(
-                      height: 12,
-                    ),
-                    Container(
-                      padding: const EdgeInsets.only(left: 10, right: 10),
-                      child: Row(
-                        children: [
-                          Icon(Icons.work_outline, color: Colors.grey),
-                          SizedBox(
-                            width: 12,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Work',
-                                style: TextStyle(fontFamily: 'Bolt-Semibold'),
-                              ),
-                              Text(
-                                'Your workspace address',
-                                style:
-                                    TextStyle(fontSize: 12, color: Colors.grey),
-                              ),
-                            ],
-                          )
-                        ],
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: SubmitFlatButton(
+                          'REQUEST DRIVER',
+                          Colors.green,
+                          () => {},
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
