@@ -104,6 +104,28 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     });
   }
 
+  void closeRequestSheet() async {
+    // RESET CAMERA POSITION
+    CameraPosition pickupPointCamera = CameraPosition(
+      target: LatLng(
+        Provider.of<AppData>(context, listen: false).pickupPoint.latitude,
+        Provider.of<AppData>(context, listen: false).pickupPoint.longitude,
+      ),
+      zoom: 18,
+    );
+
+    mapController
+        .animateCamera(CameraUpdate.newCameraPosition(pickupPointCamera));
+
+    setState(() {
+      polylineCoords.clear();
+      _marker.clear();
+      _circle.clear();
+      searchSheetHigh = true;
+      requestSheetHigh = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -510,6 +532,33 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               ),
             ),
           ),
+          (requestSheetHigh == true)
+              ? Positioned(
+                  bottom: MediaQuery.of(context).size.height * 0.31,
+                  left: 12,
+                  child: GestureDetector(
+                    onTap: () {
+                      closeRequestSheet();
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(100),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            spreadRadius: 1.5,
+                            blurRadius: 0.5,
+                            offset: Offset(0.5, 0.5),
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.arrow_back_sharp),
+                    ),
+                  ),
+                )
+              : Container(),
         ],
       ),
     );
