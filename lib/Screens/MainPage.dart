@@ -471,7 +471,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                   ),
                                   Text(
                                     (_routes != null)
-                                        ? '${_routes.destDistanceKM}KM/${_routes.destDistanceM}M'
+                                        ? (double.parse(_routes.destDistanceM) <
+                                                1000)
+                                            ? '<${_routes.destDistanceKM}km/${_routes.destDistanceM}m'
+                                            : '${_routes.destDistanceKM}km/${_routes.destDistanceM}m'
                                         : '',
                                     style: TextStyle(
                                       fontSize: 14,
@@ -483,7 +486,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               Expanded(child: Container()),
                               Text(
                                 (_routes != null)
-                                    ? 'Rp.${HttpRequestMethod.calculateFares(_routes)}'
+                                    ? 'Rp${HttpRequestMethod.calculateFares(_routes)},-'
                                     : '',
                                 style: TextStyle(
                                   fontSize: 18,

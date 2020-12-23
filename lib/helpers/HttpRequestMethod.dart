@@ -55,7 +55,8 @@ class HttpRequestMethod {
     // assign value to Model
     Routes routesModels = Routes();
 
-    routesModels.destDistanceM = response["routes"][0]["distance"].toString();
+    routesModels.destDistanceM =
+        response["routes"][0]["distance"].toStringAsFixed(0);
     routesModels.destDistanceKM =
         (response["routes"][0]["distance"] / 1000).round().toStringAsFixed(0);
     routesModels.destDuration =
@@ -69,12 +70,11 @@ class HttpRequestMethod {
     // BASE FARES -> RP.3000
     // DISTANCE FARES -> RP.2000
     // TIME FARES -> RP.1000
-    double baseFares = 3000;
-    double distFares = (double.parse(routes.destDistanceM) / 1000) * 1000;
+    double baseFares = 5000;
+    double distFares = (double.parse(routes.destDistanceKM) * 5000);
     double timeFares = (double.parse(routes.destDuration) * 500);
 
-    String totalFares =
-        (baseFares + distFares + timeFares).round().toStringAsFixed(0);
+    int totalFares = (baseFares + distFares + timeFares).toInt();
 
     return totalFares;
   }
