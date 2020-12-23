@@ -215,8 +215,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         children: [
           GoogleMap(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).size.height * 0.39,
-              left: 8,
+              bottom: (requestSheetHigh == false)
+                  ? MediaQuery.of(context).size.height * 0.39
+                  : MediaQuery.of(context).size.height * 0.3,
+              left: (requestSheetHigh == false) ? 8 : 56,
               right: 8,
               top: MediaQuery.of(context).size.height * 0.1,
             ),
