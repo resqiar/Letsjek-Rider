@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uber_clone/Screens/SearchPage.dart';
 import 'package:uber_clone/helpers/HttpRequestMethod.dart';
+import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
 import 'package:uber_clone/widgets/ProgressDialogue.dart';
@@ -39,6 +40,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   Set<Polyline> _polylines = {};
   Set<Marker> _marker = {};
   Set<Circle> _circle = {};
+
+  Routes _routes;
 
   // ! GeoLocator Get Current Position
   Position currentPosition;
@@ -445,7 +448,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                         fontFamily: 'Bolt-Semibold'),
                                   ),
                                   Text(
-                                    '7km/7245m',
+                                    (_routes != null)
+                                        ? '${_routes.destDistanceKM}KM/${_routes.destDistanceM}M'
+                                        : '',
                                     style: TextStyle(
                                       fontSize: 14,
                                       color: Colors.grey,
@@ -455,7 +460,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               ),
                               Expanded(child: Container()),
                               Text(
-                                '\$13',
+                                (_routes != null)
+                                    ? 'Rp.${HttpRequestMethod.calculateFares(_routes)}'
+                                    : '',
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontFamily: 'Bolt-Semibold',
@@ -526,6 +533,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     // CALL THE HELPER METHOD TO GET ROUTES/DETAILS
     var getRoutes =
         await HttpRequestMethod.findRoutes(pickupLatLng, destLatLng);
+
+    setState(() {
+      _routes = getRoutes;
+    });
 
     // !: RENDER ROUTES :!
     PolylinePoints polylinePoints = PolylinePoints();

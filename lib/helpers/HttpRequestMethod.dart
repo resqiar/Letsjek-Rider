@@ -64,4 +64,18 @@ class HttpRequestMethod {
 
     return routesModels;
   }
+
+  static calculateFares(Routes routes) {
+    // BASE FARES -> RP.3000
+    // DISTANCE FARES -> RP.2000
+    // TIME FARES -> RP.1000
+    double baseFares = 3000;
+    double distFares = (double.parse(routes.destDistanceM) / 1000) * 1000;
+    double timeFares = (double.parse(routes.destDuration) * 500);
+
+    String totalFares =
+        (baseFares + distFares + timeFares).round().toStringAsFixed(0);
+
+    return totalFares;
+  }
 }
