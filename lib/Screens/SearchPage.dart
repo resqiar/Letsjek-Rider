@@ -126,7 +126,10 @@ class _SearchPageState extends State<SearchPage> {
                                 decoration: InputDecoration(
                                   hintText: 'Pickup Location',
                                   filled: true,
-                                  border: InputBorder.none,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(100),
+                                    borderSide: BorderSide.none,
+                                  ),
                                   contentPadding:
                                       EdgeInsets.symmetric(horizontal: 18),
                                 ),
@@ -155,21 +158,21 @@ class _SearchPageState extends State<SearchPage> {
                               color: Colors.lightBlue[50],
                               borderRadius: BorderRadius.circular(100),
                             ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(2.0),
-                              child: TextField(
-                                controller: destTextController,
-                                onChanged: (value) => searchPlace(value),
-                                autofocus: true,
-                                decoration: InputDecoration(
-                                  hintText: 'Where to?',
-                                  hintStyle:
-                                      TextStyle(fontFamily: 'Bolt-Semibold'),
-                                  filled: true,
-                                  border: InputBorder.none,
-                                  contentPadding:
-                                      EdgeInsets.symmetric(horizontal: 18),
+                            child: TextField(
+                              controller: destTextController,
+                              onChanged: (value) => searchPlace(value),
+                              autofocus: true,
+                              decoration: InputDecoration(
+                                hintText: 'Where to?',
+                                hintStyle:
+                                    TextStyle(fontFamily: 'Bolt-Semibold'),
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(100),
+                                  borderSide: BorderSide.none,
                                 ),
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 18),
                               ),
                             ),
                           ),

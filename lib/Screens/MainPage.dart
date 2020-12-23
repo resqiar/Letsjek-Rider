@@ -559,7 +559,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           ),
                         ],
                       ),
-                      child: Icon(Icons.arrow_back_sharp),
+                      child: Icon(Icons.close_rounded),
                     ),
                   ),
                 )
