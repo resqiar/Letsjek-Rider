@@ -11,6 +11,7 @@ import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
 import 'package:uber_clone/widgets/ProgressDialogue.dart';
 import 'package:uber_clone/widgets/SubmitFlatButton.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
 
 class MainPage extends StatefulWidget {
   static const id = 'mainpage';
@@ -92,6 +93,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   // HEIGHT OF THE SHEET
   bool searchSheetHigh = true;
   bool requestSheetHigh = false;
+  bool isRequesting = false;
 
   void showRequestSheet() async {
     // GET ROUTES
@@ -123,6 +125,37 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       _circle.clear();
       searchSheetHigh = true;
       requestSheetHigh = false;
+    });
+  }
+
+  void isNowRequesting() async {
+    setState(() {
+      searchSheetHigh = false;
+      requestSheetHigh = false;
+      isRequesting = true;
+    });
+  }
+
+  void cancelRequesting() async {
+    // RESET CAMERA POSITION
+    CameraPosition pickupPointCamera = CameraPosition(
+      target: LatLng(
+        Provider.of<AppData>(context, listen: false).pickupPoint.latitude,
+        Provider.of<AppData>(context, listen: false).pickupPoint.longitude,
+      ),
+      zoom: 18,
+    );
+
+    mapController
+        .animateCamera(CameraUpdate.newCameraPosition(pickupPointCamera));
+
+    setState(() {
+      polylineCoords.clear();
+      _marker.clear();
+      _circle.clear();
+      searchSheetHigh = true;
+      requestSheetHigh = false;
+      isRequesting = false;
     });
   }
 
@@ -215,9 +248,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         children: [
           GoogleMap(
             padding: EdgeInsets.only(
-              bottom: (requestSheetHigh == false)
-                  ? MediaQuery.of(context).size.height * 0.39
-                  : MediaQuery.of(context).size.height * 0.3,
+              bottom: (searchSheetHigh == false)
+                  ? MediaQuery.of(context).size.height * 0.31
+                  : MediaQuery.of(context).size.height * 0.39,
               left: (requestSheetHigh == false) ? 8 : 56,
               right: 8,
               top: MediaQuery.of(context).size.height * 0.1,
@@ -528,7 +561,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                         child: SubmitFlatButton(
                           'REQUEST DRIVER',
                           Colors.green,
-                          () => {},
+                          () {
+                            isNowRequesting();
+                          },
                         ),
                       ),
                     ],
@@ -537,6 +572,91 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               ),
             ),
           ),
+          (isRequesting == true)
+              ? Positioned(
+                  bottom: MediaQuery.of(context).size.height * 0.26,
+                  left: 12,
+                  child: GestureDetector(
+                    onTap: () {
+                      cancelRequesting();
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.redAccent,
+                        borderRadius: BorderRadius.circular(100),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            spreadRadius: 1.5,
+                            blurRadius: 0.5,
+                            offset: Offset(0.5, 0.5),
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        'CANCEL RIDE',
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontFamily: 'Bolt-Semibold'),
+                      ),
+                    ),
+                  ),
+                )
+              : Container(),
+          (isRequesting == true)
+              ? Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    height: MediaQuery.of(context).size.height * 0.25,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 18.0,
+                          spreadRadius: 0.8,
+                          offset: Offset(0.8, 0.8),
+                        ),
+                      ],
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(height: 28),
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation(Colors.grey),
+                          ),
+                          SizedBox(height: 8),
+                          RotateAnimatedTextKit(
+                            duration: Duration(milliseconds: 700),
+                            repeatForever: true,
+                            textStyle: TextStyle(
+                              fontSize: 18,
+                              fontFamily: 'Bolt-Semibold',
+                              color: Colors.grey,
+                            ),
+                            text: [
+                              'REQUESTING DRIVERS',
+                              'NOTIFYING DRIVERS',
+                              'CALLING DRIVERS'
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : Container(),
           (requestSheetHigh == true)
               ? Positioned(
                   bottom: MediaQuery.of(context).size.height * 0.31,
