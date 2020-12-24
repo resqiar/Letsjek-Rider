@@ -1,14 +1,35 @@
 import 'package:connectivity/connectivity.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uber_clone/helpers/HttpReqHelper.dart';
 import 'package:uber_clone/models/Address.dart';
+import 'package:uber_clone/models/CurrentUser.dart';
 import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/global.dart' as global;
 
 class HttpRequestMethod {
+  static Future getCurrentUserData() async {
+    // get current user info
+    FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    String currentUserId = firebaseAuth.currentUser.uid;
+
+    // firebase database;
+    DatabaseReference databaseReference =
+        FirebaseDatabase.instance.reference().child('users/$currentUserId');
+    // get data snapshot from DB
+    databaseReference.once().then((DataSnapshot userData) {
+      // check if its null
+      if (userData != null) {
+        // save to CurrentUser model
+        CurrentUser currentUserData = CurrentUser.fromSnapshot(userData);
+      }
+    });
+  }
+
   static Future findAddressByCoord(Position coord, context) async {
     // dummy var
     var address = '';
