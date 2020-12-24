@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -6,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uber_clone/Screens/SearchPage.dart';
 import 'package:uber_clone/helpers/HttpRequestMethod.dart';
+import 'package:uber_clone/models/CurrentUser.dart';
 import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
@@ -129,6 +131,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   }
 
   void isNowRequesting() async {
+    requestDriverNow();
+
     setState(() {
       searchSheetHigh = false;
       requestSheetHigh = false;
@@ -149,6 +153,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     mapController
         .animateCamera(CameraUpdate.newCameraPosition(pickupPointCamera));
 
+    DatabaseReference rideRequestDB = FirebaseDatabase.instance
+        .reference()
+        .child('ride_request/$rideRequestKey');
+
+    print(rideRequestKey);
+    rideRequestDB.remove();
+
     setState(() {
       polylineCoords.clear();
       _marker.clear();
@@ -158,6 +169,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       isRequesting = false;
     });
   }
+
+  CurrentUser currentUser = CurrentUser();
+  String rideRequestKey = '';
 
   @override
   void initState() {
@@ -825,6 +839,45 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       _marker.add(destMarker);
       _circle.add(pickupCircle);
       _circle.add(destCircle);
+    });
+  }
+
+  void requestDriverNow() {
+    var requestDBRef =
+        FirebaseDatabase.instance.reference().child('ride_request').push();
+
+    var pickup = Provider.of<AppData>(context, listen: false).pickupPoint;
+    var dest = Provider.of<AppData>(context, listen: false).destPoint;
+
+    Map pickupCoord = {
+      'latitude': pickup.latitude.toString(),
+      'longitude': pickup.longitude.toString()
+    };
+
+    Map destCoord = {
+      'latitude': dest.latitude.toString(),
+      'longitude': dest.longitude.toString()
+    };
+
+    // ADD DATA TO DB
+    Map rideRequestDetails = {
+      'rider_name': currentUser.userFullname,
+      'rider_phone': currentUser.userPhone,
+      'pickup_address': pickup.formattedAddress,
+      'dest_address': dest.formattedAddress,
+      'created_at': DateTime.now().toString(),
+      'pickup_coord': pickupCoord,
+      'dest_coord': destCoord,
+      'payment': 'cash',
+      'driver_id': 'waiting',
+      'status': 'waiting',
+    };
+
+    // SAVE TO DB
+    requestDBRef.set(rideRequestDetails).whenComplete(() {
+      setState(() {
+        rideRequestKey = requestDBRef.key;
+      });
     });
   }
 }
