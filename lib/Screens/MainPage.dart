@@ -194,7 +194,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             children: [
               Container(
                 height: 150,
-                color: Colors.greenAccent,
+                color: Colors.white,
                 padding: EdgeInsets.all(8),
                 child: DrawerHeader(
                   child: Row(
@@ -237,7 +237,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-              ListDivider(),
               SizedBox(
                 height: 12,
               ),
@@ -501,6 +500,58 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   padding: EdgeInsets.symmetric(vertical: 16),
                   child: Column(
                     children: [
+                      Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        child: Row(
+                          children: [
+                            Text(
+                              'from',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            SizedBox(
+                              width: 4,
+                            ),
+                            Container(
+                              width: 100,
+                              child: Text(
+                                (Provider.of<AppData>(context).pickupPoint !=
+                                        null)
+                                    ? Provider.of<AppData>(context)
+                                        .pickupPoint
+                                        .formattedAddress
+                                    : '',
+                                style: TextStyle(
+                                    fontSize: 12, fontFamily: 'Bolt-Semibold'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              'to',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            SizedBox(
+                              width: 4,
+                            ),
+                            Container(
+                              width: 100,
+                              child: Text(
+                                (Provider.of<AppData>(context).destPoint !=
+                                        null)
+                                    ? Provider.of<AppData>(context)
+                                        .destPoint
+                                        .formattedAddress
+                                    : '',
+                                style: TextStyle(
+                                    fontSize: 12, fontFamily: 'Bolt-Semibold'),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                       Container(
                         width: double.infinity,
                         color: Colors.green[50],
@@ -795,15 +846,15 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
 
     // ADD A MARKER
-    Marker pickupMarker = Marker(
-      markerId: MarkerId('pickup'),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-      infoWindow: InfoWindow(
-        title: pickupPoint.formattedAddress,
-        snippet: 'Lat: ${pickupPoint.latitude}; Lng: ${pickupPoint.longitude}',
-      ),
-      position: pickupLatLng,
-    );
+    // Marker pickupMarker = Marker(
+    //   markerId: MarkerId('pickup'),
+    //   icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+    //   infoWindow: InfoWindow(
+    //     title: pickupPoint.formattedAddress,
+    //     snippet: 'Lat: ${pickupPoint.latitude}; Lng: ${pickupPoint.longitude}',
+    //   ),
+    //   position: pickupLatLng,
+    // );
 
     Marker destMarker = Marker(
       markerId: MarkerId('dest'),
@@ -835,7 +886,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     );
 
     setState(() {
-      _marker.add(pickupMarker);
+      // _marker.add(pickupMarker);
       _marker.add(destMarker);
       _circle.add(pickupCircle);
       _circle.add(destCircle);
