@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:uber_clone/helpers/HttpReqHelper.dart';
 import 'package:uber_clone/models/Address.dart';
@@ -95,7 +96,10 @@ class HttpRequestMethod {
     double distFares = (double.parse(routes.destDistanceKM) * 5000);
     double timeFares = (double.parse(routes.destDuration) * 500);
 
-    int totalFares = (baseFares + distFares + timeFares).toInt();
+    int totalCalc = (baseFares + distFares + timeFares).toInt();
+    String totalFares =
+        NumberFormat.currency(locale: 'id', symbol: 'IDR ', decimalDigits: 0)
+            .format(totalCalc);
 
     return totalFares;
   }

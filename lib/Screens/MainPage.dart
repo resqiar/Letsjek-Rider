@@ -510,10 +510,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               style: TextStyle(fontSize: 12),
                             ),
                             SizedBox(
-                              width: 4,
+                              width: 2,
                             ),
                             Container(
-                              width: 100,
+                              padding: EdgeInsets.all(0),
+                              width: 90,
                               child: Text(
                                 (Provider.of<AppData>(context).pickupPoint !=
                                         null)
@@ -535,7 +536,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               width: 4,
                             ),
                             Container(
-                              width: 100,
+                              padding: EdgeInsets.all(0),
+                              width: 150,
                               child: Text(
                                 (Provider.of<AppData>(context).destPoint !=
                                         null)
@@ -593,7 +595,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               Expanded(child: Container()),
                               Text(
                                 (_routes != null)
-                                    ? 'Rp${HttpRequestMethod.calculateFares(_routes)},-'
+                                    ? '${HttpRequestMethod.calculateFares(_routes)},-'
                                     : '',
                                 style: TextStyle(
                                   fontSize: 18,
