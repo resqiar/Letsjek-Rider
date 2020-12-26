@@ -4,14 +4,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uber_clone/Screens/MainPage.dart';
-import 'package:uber_clone/Screens/Rider/RegisterPage.dart';
+import 'package:uber_clone/Screens/Auth/RegisterPage.dart';
 import 'package:uber_clone/provider/AppData.dart';
 
-import 'Screens/Rider/LoginPage.dart';
+import 'Screens/Auth/LoginPage.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Firebase.initializeApp(
+  await Firebase.initializeApp(
     options: Platform.isIOS || Platform.isMacOS
         ? FirebaseOptions(
             appId: '1:297855924061:ios:c6de2b69b03a5be8',
@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primaryColor: Colors.green,
           fontFamily: 'Bolt-Regular',
+          visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
         initialRoute: MainPage.id,
         routes: {

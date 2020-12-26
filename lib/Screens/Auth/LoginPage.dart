@@ -2,7 +2,7 @@ import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:uber_clone/Screens/Rider/RegisterPage.dart';
+import 'package:uber_clone/Screens/Auth/RegisterPage.dart';
 import 'package:uber_clone/widgets/ProgressDialogue.dart';
 import 'package:uber_clone/widgets/SubmitFlatButton.dart';
 
