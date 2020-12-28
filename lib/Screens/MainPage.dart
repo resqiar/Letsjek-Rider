@@ -1,13 +1,17 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uber_clone/Screens/SearchPage.dart';
+import 'package:uber_clone/helpers/GeofireHelper.dart';
 import 'package:uber_clone/helpers/HttpRequestMethod.dart';
 import 'package:uber_clone/models/CurrentUser.dart';
+import 'package:uber_clone/models/NearbyDrivers.dart';
 import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
@@ -78,6 +82,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
       // GEOCODE
       String address = await HttpRequestMethod.findAddressByCoord(pos, context);
+
+      // GET AVAILABLE DRIVERS
+      getAvailableDrivers();
     } catch (e) {
       showSnackbar(e.toString());
     }
@@ -172,6 +179,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   CurrentUser currentUser = CurrentUser();
   String rideRequestKey = '';
+
+  // DRIVERS STATE
+  bool driversGeoQueryIsLoaded = false;
 
   @override
   void initState() {
@@ -762,6 +772,100 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         ],
       ),
     );
+  }
+
+  void getAvailableDrivers() {
+    // listening db
+    Geofire.initialize('available_drivers');
+
+    // geo queries
+    Geofire.queryAtLocation(
+            currentPosition.latitude, currentPosition.longitude, 20)
+        .listen((map) {
+      /////////////////////////////////////////////////
+      if (map != null) {
+        var callBack = map['callBack'];
+
+        //latitude will be retrieved from map['latitude']
+        //longitude will be retrieved from map['longitude']
+
+        switch (callBack) {
+          case Geofire.onKeyEntered:
+
+            // PASS THE VALUE TO DATA MODELS
+            NearbyDrivers nearbyDriversModel = NearbyDrivers();
+            nearbyDriversModel.driverKey = map['key'];
+            nearbyDriversModel.latitude = map['latitude'];
+            nearbyDriversModel.longitude = map['longitude'];
+
+            // add all to list
+            GeofireHelper.nearbyDriverList.add(nearbyDriversModel);
+
+            // check if geo query is loaded or not
+            if (driversGeoQueryIsLoaded) {
+              updateDriversMarker();
+            }
+
+            break;
+
+          case Geofire.onKeyExited:
+            GeofireHelper.removeDriver(map['key']);
+            updateDriversMarker();
+
+            break;
+
+          case Geofire.onKeyMoved:
+            // PASS THE VALUE TO DATA MODELS
+            NearbyDrivers nearbyDriversModel = NearbyDrivers();
+            nearbyDriversModel.driverKey = map['key'];
+            nearbyDriversModel.latitude = map['latitude'];
+            nearbyDriversModel.longitude = map['longitude'];
+
+            // Update your key's location
+            GeofireHelper.updateDriver(nearbyDriversModel);
+            updateDriversMarker();
+
+            break;
+
+          case Geofire.onGeoQueryReady:
+            driversGeoQueryIsLoaded = true;
+
+            // All Intial Data is loaded
+            updateDriversMarker();
+
+            break;
+        }
+      }
+    });
+  }
+
+  void updateDriversMarker() {
+    // Clear All Marker First
+    setState(() {
+      _marker.clear();
+    });
+
+    // make new set of Marker
+    Set<Marker> temporaryMarkers = Set<Marker>();
+
+    // loop to get all drivers LAT & LNG
+    for (NearbyDrivers nearbyDrivers in GeofireHelper.nearbyDriverList) {
+      LatLng driversPosition =
+          LatLng(nearbyDrivers.latitude, nearbyDrivers.longitude);
+
+      Marker thisMarker = Marker(
+        markerId: MarkerId('driver&${nearbyDrivers.driverKey}'),
+        position: driversPosition,
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        rotation: Random().nextInt(360).toDouble(),
+      );
+
+      temporaryMarkers.add(thisMarker);
+    }
+
+    setState(() {
+      _marker = temporaryMarkers;
+    });
   }
 
   Future getRoutes() async {
