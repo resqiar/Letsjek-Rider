@@ -183,6 +183,25 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   // DRIVERS STATE
   bool driversGeoQueryIsLoaded = false;
 
+  // DRIVERS ICON
+  BitmapDescriptor driverIcon;
+
+  void createDriverMarker() {
+    if (driverIcon == null) {
+      ImageConfiguration imageConfiguration = createLocalImageConfiguration(
+        context,
+        size: Size(2, 2),
+      );
+
+      // ICON IMAGE
+      BitmapDescriptor.fromAssetImage(
+              imageConfiguration, 'resources/images/car_android.png')
+          .then((icon) {
+        driverIcon = icon;
+      });
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -192,6 +211,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    createDriverMarker();
+
     return Scaffold(
       key: _scaffoldKey,
       drawer: Container(
@@ -856,7 +877,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       Marker thisMarker = Marker(
         markerId: MarkerId('driver&${nearbyDrivers.driverKey}'),
         position: driversPosition,
-        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        icon: driverIcon,
         rotation: Random().nextInt(360).toDouble(),
       );
 
