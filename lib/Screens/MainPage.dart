@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uber_clone/Screens/SearchPage.dart';
+import 'package:uber_clone/global.dart';
 import 'package:uber_clone/helpers/GeofireHelper.dart';
 import 'package:uber_clone/helpers/HttpRequestMethod.dart';
 import 'package:uber_clone/models/CurrentUser.dart';
@@ -177,7 +178,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     });
   }
 
-  CurrentUser currentUser = CurrentUser();
   String rideRequestKey = '';
 
   // DRIVERS STATE
@@ -1051,6 +1051,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       'driver_id': 'waiting',
       'status': 'waiting',
     };
+
+    print(currentUser.userFullname);
 
     // SAVE TO DB
     requestDBRef.set(rideRequestDetails).whenComplete(() {

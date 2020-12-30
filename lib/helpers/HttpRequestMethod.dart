@@ -10,12 +10,12 @@ import 'package:uber_clone/models/Address.dart';
 import 'package:uber_clone/models/CurrentUser.dart';
 import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
-import 'package:uber_clone/global.dart' as global;
+import 'package:uber_clone/global.dart';
 
 class HttpRequestMethod {
-  static Future getCurrentUserData() async {
+  static getCurrentUserData() {
     // get current user info
-    FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    firebaseAuth = FirebaseAuth.instance;
     String currentUserId = firebaseAuth.currentUser.uid;
 
     // firebase database;
@@ -26,7 +26,7 @@ class HttpRequestMethod {
       // check if its null
       if (userData != null) {
         // save to CurrentUser model
-        CurrentUser currentUserData = CurrentUser.fromSnapshot(userData);
+        currentUser = CurrentUser.fromSnapshot(userData);
       }
     });
   }
@@ -67,7 +67,7 @@ class HttpRequestMethod {
   static Future<Routes> findRoutes(LatLng pickupPoint, LatLng destPoint) async {
     // Get Response
     var URL =
-        "https://us1.locationiq.com/v1/directions/driving/${pickupPoint.longitude},${pickupPoint.latitude};${destPoint.longitude},${destPoint.latitude}?key=${global.locationIQKeys}&overview=full";
+        "https://us1.locationiq.com/v1/directions/driving/${pickupPoint.longitude},${pickupPoint.latitude};${destPoint.longitude},${destPoint.latitude}?key=$locationIQKeys&overview=full";
 
     var response = await HttpReqHelper.getRequest(URL);
 
