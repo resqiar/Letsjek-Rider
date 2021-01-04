@@ -1021,12 +1021,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     });
   }
 
-  void requestDriverNow() {
+  void requestDriverNow() async {
     var requestDBRef =
         FirebaseDatabase.instance.reference().child('ride_request').push();
 
     var pickup = Provider.of<AppData>(context, listen: false).pickupPoint;
     var dest = Provider.of<AppData>(context, listen: false).destPoint;
+    var fares = await HttpRequestMethod.calculateFreshFares(_routes);
 
     Map pickupCoord = {
       'latitude': pickup.latitude.toString(),
@@ -1047,6 +1048,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       'created_at': DateTime.now().toString(),
       'pickup_coord': pickupCoord,
       'dest_coord': destCoord,
+      'fares_price': fares.toString(),
       'payment': 'cash',
       'driver_id': 'waiting',
       'status': 'waiting',

@@ -103,4 +103,17 @@ class HttpRequestMethod {
 
     return totalFares;
   }
+
+  static calculateFreshFares(Routes routes) {
+    // BASE FARES -> RP.3000
+    // DISTANCE FARES -> RP.2000
+    // TIME FARES -> RP.1000
+    double baseFares = 5000;
+    double distFares = (double.parse(routes.destDistanceKM) * 5000);
+    double timeFares = (double.parse(routes.destDuration) * 500);
+
+    int totalCalc = (baseFares + distFares + timeFares).toInt();
+
+    return totalCalc;
+  }
 }
