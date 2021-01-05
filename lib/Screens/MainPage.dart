@@ -105,6 +105,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   // HEIGHT OF THE SHEET
   bool searchSheetHigh = true;
   bool requestSheetHigh = false;
+  bool tripSheetHigh = false;
   bool isRequesting = false;
 
   void showRequestSheet() async {
@@ -207,6 +208,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         driverIcon = icon;
       });
     }
+  }
+
+  void showTripSheet() {
+    setState(() {
+      searchSheetHigh = false;
+      tripSheetHigh = true;
+    });
   }
 
   @override
@@ -680,7 +688,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             //! WHY THIS NEED TIMER?
                             // I JUST FIGURED OUT THAT isNowRequesting() NEEDS SOME TIMES TO FINISH
                             // SO IT WOULD BE REALISTIC TO WAIT A LITTLE BIT AND THEN START FIND DRIVER
-                            Timer(Duration(seconds: 5), () {
+                            Timer(Duration(seconds: 3), () {
                               selectNearbyDrivers();
                             });
                           },
@@ -804,6 +812,174 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   ),
                 )
               : Container(),
+
+          //! TRIP SHEET
+          /// Trip Sheet
+          (tripSheetHigh)
+              ? Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: AnimatedSize(
+                    vsync: this,
+                    duration: Duration(milliseconds: 150),
+                    curve: Curves.easeIn,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(15),
+                            topRight: Radius.circular(15)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 15.0, // soften the shadow
+                            spreadRadius: 0.5, //extend the shadow
+                            offset: Offset(
+                              0.7, // Move to right 10  horizontally
+                              0.7, // Move to bottom 10 Vertically
+                            ),
+                          )
+                        ],
+                      ),
+                      height: MediaQuery.of(context).size.height * 0.31,
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Driver is on the way - 24 mins away',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 16,
+                                    fontFamily: 'Bolt-Semibold',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 14,
+                            ),
+                            Text(
+                              '$tripDriverCarBrand - $tripDriverCarPlate - $tripDriverCarColor',
+                              style: TextStyle(fontFamily: 'Bolt-Semibold'),
+                            ),
+                            Text(
+                              tripDriverFullName,
+                              style: TextStyle(
+                                  fontSize: 20, fontFamily: 'Bolt-Semibold'),
+                            ),
+                            SizedBox(
+                              height: 16,
+                            ),
+                            ListDivider(),
+                            SizedBox(
+                              height: 12,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 50,
+                                      width: 50,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular((25))),
+                                        border: Border.all(
+                                            width: 1.5, color: Colors.green),
+                                      ),
+                                      child: Icon(
+                                        Icons.call,
+                                        color: Colors.green,
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      'Call',
+                                      style: TextStyle(
+                                        color: Colors.green,
+                                        fontFamily: 'Bolt-Semibold',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 50,
+                                      width: 50,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular((25))),
+                                        border: Border.all(
+                                            width: 1.5, color: Colors.green),
+                                      ),
+                                      child:
+                                          Icon(Icons.list, color: Colors.green),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      'Details',
+                                      style: TextStyle(
+                                        color: Colors.green,
+                                        fontFamily: 'Bolt-Semibold',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      height: 50,
+                                      width: 50,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular((25))),
+                                        border: Border.all(
+                                            width: 1.5, color: Colors.red),
+                                      ),
+                                      child:
+                                          Icon(Icons.clear, color: Colors.red),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      'Cancel',
+                                      style: TextStyle(
+                                        color: Colors.red,
+                                        fontFamily: 'Bolt-Semibold',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : Container(),
         ],
       ),
     );
@@ -850,7 +1026,50 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
         // SEND NOTIFICATIONS TO DRIVER BY ITS TOKEN
         sendMessage(driverToken, rideRequestKey);
+      } else {
+        return;
       }
+
+      const onSec = Duration(seconds: 1);
+
+      // SET TIMER
+      var timer = Timer.periodic(onSec, (timer) {
+        timerCountdown--;
+
+        // check if user is no longer requesting
+        if (!isRequesting) {
+          driverStatusRef.set('cancelled');
+          driverStatusRef.onDisconnect();
+
+          // disable timer
+          timer.cancel();
+          timerCountdown = 15;
+        }
+
+        // if DRIVER accepted the request then stop the countdown
+        driverStatusRef.onValue.listen((event) {
+          if (event.snapshot.value.toString() == 'accepted') {
+            driverStatusRef.onDisconnect();
+
+            // disable timer
+            timer.cancel();
+            timerCountdown = 15;
+          }
+        });
+
+        // if timer countdown == 0 set request to timedOut
+        if (timerCountdown == 0) {
+          driverStatusRef.set('timeout');
+          driverStatusRef.onDisconnect();
+
+          // disable timer
+          timer.cancel();
+          timerCountdown = 15;
+
+          // select another driver
+          selectNearbyDrivers();
+        }
+      });
     });
   }
 
@@ -867,15 +1086,15 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       body: jsonEncode(
         <String, dynamic>{
           'notification': <String, dynamic>{
-            'body': 'New Ride Request Available!',
-            'title': 'Rider requesting trip near your locations. Tap here!'
+            'body': 'Rider requesting trip near your locations. Tap here!',
+            'title': 'New Trip Request is Available',
           },
           'priority': 'high',
           'data': <String, dynamic>{
             'click_action': 'FLUTTER_NOTIFICATION_CLICK',
             'id': '1',
             'status': 'done',
-            'ride_id': tripID
+            'request_id': tripID,
           },
           'to': driverToken
         },
@@ -909,6 +1128,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
             // add all to list
             GeofireHelper.nearbyDriverList.add(nearbyDriversModel);
+            setState(() {
+              availableDrivers = GeofireHelper.nearbyDriverList;
+            });
 
             // check if geo query is loaded or not
             if (driversGeoQueryIsLoaded) {
@@ -919,6 +1141,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
           case Geofire.onKeyExited:
             GeofireHelper.removeDriver(map['key']);
+            setState(() {
+              availableDrivers = GeofireHelper.nearbyDriverList;
+            });
             updateDriversMarker();
 
             break;
@@ -1142,13 +1367,42 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       'status': 'waiting',
     };
 
-    print(currentUser.userFullname);
-
     // SAVE TO DB
     requestDBRef.set(rideRequestDetails).whenComplete(() {
       setState(() {
         rideRequestKey = requestDBRef.key;
       });
+    });
+
+    driverStatusRef = requestDBRef.onValue.listen((event) {
+      // null safety
+      if (event.snapshot.value == null) {
+        return;
+      }
+
+      if (event.snapshot.value['status'] != null) {
+        tripStatus = event.snapshot.value['status'].toString();
+      }
+
+      if (tripStatus == 'accepted') {
+        setState(() {
+          tripDriverFullName =
+              event.snapshot.value['driver_info']['driver_name'].toString();
+          tripDriverPhoneNumber =
+              event.snapshot.value['driver_info']['driver_phone'].toString();
+          tripDriverCarBrand =
+              event.snapshot.value['driver_info']['vehicle_name'].toString();
+          tripDriverCarPlate =
+              event.snapshot.value['driver_info']['vehicle_number'].toString();
+          tripDriverCarColor =
+              event.snapshot.value['driver_info']['vehicle_color'].toString();
+
+          isRequesting = false;
+        });
+
+        showTripSheet();
+        Geofire.stopListener();
+      }
     });
   }
 }
