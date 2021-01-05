@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -11,11 +12,12 @@ import 'package:uber_clone/Screens/SearchPage.dart';
 import 'package:uber_clone/global.dart';
 import 'package:uber_clone/helpers/GeofireHelper.dart';
 import 'package:uber_clone/helpers/HttpRequestMethod.dart';
-import 'package:uber_clone/models/CurrentUser.dart';
+import 'package:http/http.dart' as http;
 import 'package:uber_clone/models/NearbyDrivers.dart';
 import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
+import 'package:uber_clone/widgets/NoNearbyDriversDialog.dart';
 import 'package:uber_clone/widgets/ProgressDialogue.dart';
 import 'package:uber_clone/widgets/SubmitFlatButton.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
@@ -138,6 +140,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     });
   }
 
+  String rideRequestKey = '';
+  List availableDrivers = [];
+
   void isNowRequesting() async {
     requestDriverNow();
 
@@ -145,6 +150,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       searchSheetHigh = false;
       requestSheetHigh = false;
       isRequesting = true;
+    });
+
+    // POPULATE NEARBY DRIVERS LIST
+    setState(() {
+      availableDrivers = GeofireHelper.nearbyDriverList;
     });
   }
 
@@ -165,7 +175,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         .reference()
         .child('ride_request/$rideRequestKey');
 
-    print(rideRequestKey);
     rideRequestDB.remove();
 
     setState(() {
@@ -177,8 +186,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       isRequesting = false;
     });
   }
-
-  String rideRequestKey = '';
 
   // DRIVERS STATE
   bool driversGeoQueryIsLoaded = false;
@@ -669,6 +676,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           Colors.green,
                           () {
                             isNowRequesting();
+
+                            //! WHY THIS NEED TIMER?
+                            // I JUST FIGURED OUT THAT isNowRequesting() NEEDS SOME TIMES TO FINISH
+                            // SO IT WOULD BE REALISTIC TO WAIT A LITTLE BIT AND THEN START FIND DRIVER
+                            Timer(Duration(seconds: 5), () {
+                              selectNearbyDrivers();
+                            });
                           },
                         ),
                       ),
@@ -791,6 +805,80 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 )
               : Container(),
         ],
+      ),
+    );
+  }
+
+  void selectNearbyDrivers() {
+    if (availableDrivers.length == 0) {
+      cancelRequesting();
+
+      // SHOW DIALOG
+      showDialog(
+        context: context,
+        builder: (BuildContext context) => NoNearbyDriversDialog(),
+        barrierDismissible: false,
+      );
+
+      return;
+    }
+
+    var nearbyDriver = availableDrivers[0];
+    availableDrivers.removeAt(0);
+
+    notifySelectedDriver(nearbyDriver);
+  }
+
+  void notifySelectedDriver(NearbyDrivers driver) {
+    // GET DRIVER STATUS
+    DatabaseReference driverStatusRef = FirebaseDatabase.instance
+        .reference()
+        .child('drivers/${driver.driverKey}/trip');
+
+    // ! SET DRIVER STATUS TO TRIP REQUEST ID
+    driverStatusRef.set(rideRequestKey);
+
+    // GET DRIVER TOKEN
+    DatabaseReference driverTokenRef = FirebaseDatabase.instance
+        .reference()
+        .child('drivers/${driver.driverKey}/token');
+
+    // RETRIEVE TOKEN
+    driverTokenRef.once().then((DataSnapshot dataSnapshot) {
+      if (dataSnapshot != null) {
+        String driverToken = dataSnapshot.value.toString();
+
+        // SEND NOTIFICATIONS TO DRIVER BY ITS TOKEN
+        sendMessage(driverToken, rideRequestKey);
+      }
+    });
+  }
+
+  void sendMessage(
+    String driverToken,
+    String tripID,
+  ) async {
+    await http.post(
+      'https://fcm.googleapis.com/fcm/send',
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': FCM_SERVER_KEYS,
+      },
+      body: jsonEncode(
+        <String, dynamic>{
+          'notification': <String, dynamic>{
+            'body': 'New Ride Request Available!',
+            'title': 'Rider requesting trip near your locations. Tap here!'
+          },
+          'priority': 'high',
+          'data': <String, dynamic>{
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'id': '1',
+            'status': 'done',
+            'ride_id': tripID
+          },
+          'to': driverToken
+        },
       ),
     );
   }

@@ -9,6 +9,8 @@ class GeofireHelper {
     int driverIndex =
         nearbyDriverList.indexWhere((value) => value.driverKey == key);
     nearbyDriverList.removeAt(driverIndex);
+
+    print('available: $nearbyDriverList');
   }
 
   // UPDATE DRIVER LOCATION AS THEY MOVE
