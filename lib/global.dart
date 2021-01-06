@@ -20,8 +20,12 @@ int timerCountdown = 15;
 // TODO: MONITORING TRIP REQUEST
 StreamSubscription<Event> driverStatusRef;
 String tripStatus = '';
+String tripStatusText = '';
 String tripDriverFullName = '';
 String tripDriverPhoneNumber = '';
 String tripDriverCarBrand = '';
 String tripDriverCarPlate = '';
 String tripDriverCarColor = '';
+String tripDriverEstimatedTime = '0';
+String tripDriverEstimatedKM = '0';
+String tripDriverEstimatedM = '0';

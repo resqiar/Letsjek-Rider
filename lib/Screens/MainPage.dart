@@ -107,6 +107,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   bool requestSheetHigh = false;
   bool tripSheetHigh = false;
   bool isRequesting = false;
+  bool isRequestingDriverInfo = false;
 
   void showRequestSheet() async {
     // GET ROUTES
@@ -842,7 +843,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           )
                         ],
                       ),
-                      height: MediaQuery.of(context).size.height * 0.32,
+                      height: MediaQuery.of(context).size.height * 0.335,
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: 18),
                         child: Column(
@@ -852,7 +853,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  'Driver is on the way - 24 mins away',
+                                  tripStatusText,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: Colors.grey,
@@ -868,7 +869,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 24),
                               width: double.infinity,
-                              color: Colors.green[200],
+                              color: Colors.green[100],
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -877,15 +878,24 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                     height: 14,
                                   ),
                                   Text(
+                                    tripDriverFullName,
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontFamily: 'Bolt-Semibold'),
+                                  ),
+                                  Text(
                                     '$tripDriverCarBrand - $tripDriverCarPlate - $tripDriverCarColor',
                                     style:
                                         TextStyle(fontFamily: 'Bolt-Semibold'),
                                   ),
                                   Text(
-                                    tripDriverFullName,
+                                    (double.parse(tripDriverEstimatedKM) < 1)
+                                        ? 'Estimated ${tripDriverEstimatedM.toString()} Meters/${tripDriverEstimatedTime.toString()} Minutes'
+                                        : 'Estimated ${tripDriverEstimatedKM.toString()} KM/${tripDriverEstimatedTime.toString()} Minutes',
                                     style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Bolt-Semibold'),
+                                        fontSize: 12,
+                                        fontFamily: 'Bolt-Semibold',
+                                        color: Colors.grey),
                                   ),
                                   SizedBox(
                                     height: 16,
@@ -894,7 +904,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               ),
                             ),
                             SizedBox(
-                              height: 18,
+                              height: 12,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1375,6 +1385,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       'fares_price': fares.toString(),
       'payment': 'cash',
       'driver_id': 'waiting',
+      'driver_info': null,
       'status': 'waiting',
     };
 
@@ -1383,37 +1394,126 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       setState(() {
         rideRequestKey = requestDBRef.key;
       });
+
+      // ! LISTEN TO CHANGED VALUE
+      driverStatusRef = requestDBRef.onValue.listen((event) async {
+        // null safety
+        if (event.snapshot.value == null) {
+          return;
+        }
+
+        if (event.snapshot.value['status'] != null) {
+          tripStatus = event.snapshot.value['status'].toString();
+        }
+
+        if (tripStatus == 'accepted') {
+          // Timer(Duration(seconds: 2), () {
+
+          // });
+          // ! DRIVER NAME
+          if (event.snapshot.value['driver_info']['driver_name'] != null) {
+            setState(() {
+              tripDriverFullName =
+                  event.snapshot.value['driver_info']['driver_name'].toString();
+            });
+          }
+
+          // ! DRIVER PHONE
+          if (event.snapshot.value['driver_info']['driver_phone'] != null) {
+            setState(() {
+              tripDriverPhoneNumber = event
+                  .snapshot.value['driver_info']['driver_phone']
+                  .toString();
+            });
+          }
+
+          // ! DRIVER CAR BRAND
+          if (event.snapshot.value['driver_info']['vehicle_name'] != null) {
+            setState(() {
+              tripDriverCarBrand = event
+                  .snapshot.value['driver_info']['vehicle_name']
+                  .toString();
+            });
+          }
+
+          // ! DRIVER CAR PLATE NUMBER
+          if (event.snapshot.value['driver_info']['vehicle_number'] != null) {
+            setState(() {
+              tripDriverCarPlate = event
+                  .snapshot.value['driver_info']['vehicle_number']
+                  .toString();
+            });
+          }
+
+          // ! DRIVER CAR COLOR
+          if (event.snapshot.value['driver_info']['vehicle_color'] != null) {
+            setState(() {
+              tripDriverCarColor = event
+                  .snapshot.value['driver_info']['vehicle_color']
+                  .toString();
+            });
+          }
+
+          if (event.snapshot.value['driver_info']['driver_coords'] != null) {
+            // ! SAVE DRIVER COORDS
+            double driverLocLat = double.parse(event
+                .snapshot.value['driver_info']['driver_coords']['latitude']
+                .toString());
+            double driverLocLng = double.parse(event
+                .snapshot.value['driver_info']['driver_coords']['longitude']
+                .toString());
+
+            LatLng driverCoords = LatLng(driverLocLat, driverLocLng);
+            print('driver coords is $driverCoords');
+
+            updateDriverCoordsInfo(driverCoords);
+          }
+
+          setState(() {
+            tripStatusText = 'Driver is on the way';
+            isRequesting = false;
+          });
+
+          showTripSheet();
+          // Geofire.stopListener();
+        }
+
+        if (tripStatus == 'picked') {
+          setState(() {
+            tripStatusText = 'Driver is arrived';
+          });
+        }
+
+        if (tripStatus == 'transporting') {
+          setState(() {
+            tripStatusText = 'On the way to destination';
+          });
+        }
+
+        if (tripStatus == 'arrived') {
+          setState(() {
+            tripStatusText = 'You have arrived';
+          });
+          Geofire.stopListener();
+        }
+      });
     });
+  }
 
-    driverStatusRef = requestDBRef.onValue.listen((event) {
-      // null safety
-      if (event.snapshot.value == null) {
-        return;
-      }
+  void updateDriverCoordsInfo(LatLng driverCoords) async {
+    if (!isRequestingDriverInfo) {
+      isRequestingDriverInfo = true;
 
-      if (event.snapshot.value['status'] != null) {
-        tripStatus = event.snapshot.value['status'].toString();
-      }
+      var getDriverInfo = await HttpRequestMethod.findRoutes(driverCoords,
+          LatLng(currentPosition.latitude, currentPosition.longitude));
 
-      if (tripStatus == 'accepted') {
-        setState(() {
-          tripDriverFullName =
-              event.snapshot.value['driver_info']['driver_name'].toString();
-          tripDriverPhoneNumber =
-              event.snapshot.value['driver_info']['driver_phone'].toString();
-          tripDriverCarBrand =
-              event.snapshot.value['driver_info']['vehicle_name'].toString();
-          tripDriverCarPlate =
-              event.snapshot.value['driver_info']['vehicle_number'].toString();
-          tripDriverCarColor =
-              event.snapshot.value['driver_info']['vehicle_color'].toString();
+      setState(() {
+        tripDriverEstimatedTime = getDriverInfo.destDuration;
+        tripDriverEstimatedM = getDriverInfo.destDistanceM;
+        tripDriverEstimatedKM = getDriverInfo.destDistanceKM;
+      });
 
-          isRequesting = false;
-        });
-
-        showTripSheet();
-        Geofire.stopListener();
-      }
-    });
+      isRequestingDriverInfo = false;
+    }
   }
 }
