@@ -842,16 +842,12 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           )
                         ],
                       ),
-                      height: MediaQuery.of(context).size.height * 0.31,
+                      height: MediaQuery.of(context).size.height * 0.32,
                       child: Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                        padding: EdgeInsets.symmetric(vertical: 18),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            SizedBox(
-                              height: 5,
-                            ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -867,23 +863,38 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               ],
                             ),
                             SizedBox(
-                              height: 14,
+                              height: 8,
                             ),
-                            Text(
-                              '$tripDriverCarBrand - $tripDriverCarPlate - $tripDriverCarColor',
-                              style: TextStyle(fontFamily: 'Bolt-Semibold'),
-                            ),
-                            Text(
-                              tripDriverFullName,
-                              style: TextStyle(
-                                  fontSize: 20, fontFamily: 'Bolt-Semibold'),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 24),
+                              width: double.infinity,
+                              color: Colors.green[200],
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height: 14,
+                                  ),
+                                  Text(
+                                    '$tripDriverCarBrand - $tripDriverCarPlate - $tripDriverCarColor',
+                                    style:
+                                        TextStyle(fontFamily: 'Bolt-Semibold'),
+                                  ),
+                                  Text(
+                                    tripDriverFullName,
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        fontFamily: 'Bolt-Semibold'),
+                                  ),
+                                  SizedBox(
+                                    height: 16,
+                                  ),
+                                ],
+                              ),
                             ),
                             SizedBox(
-                              height: 16,
-                            ),
-                            ListDivider(),
-                            SizedBox(
-                              height: 12,
+                              height: 18,
                             ),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -954,7 +965,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                         borderRadius: BorderRadius.all(
                                             Radius.circular((25))),
                                         border: Border.all(
-                                            width: 1.5, color: Colors.red),
+                                            width: 1.5, color: Colors.grey),
                                       ),
                                       child:
                                           Icon(Icons.clear, color: Colors.red),
@@ -965,7 +976,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                     Text(
                                       'Cancel',
                                       style: TextStyle(
-                                        color: Colors.red,
+                                        color: Colors.grey,
                                         fontFamily: 'Bolt-Semibold',
                                       ),
                                     ),
