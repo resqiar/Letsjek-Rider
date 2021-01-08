@@ -13,6 +13,8 @@ import 'package:uber_clone/global.dart';
 import 'package:uber_clone/helpers/GeofireHelper.dart';
 import 'package:uber_clone/helpers/HttpRequestMethod.dart';
 import 'package:http/http.dart' as http;
+import 'package:maps_toolkit/maps_toolkit.dart' as mp;
+import 'package:uber_clone/helpers/MapToolkitHelper.dart';
 import 'package:uber_clone/models/NearbyDrivers.dart';
 import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
@@ -191,6 +193,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
   // DRIVERS STATE
   bool driversGeoQueryIsLoaded = false;
+  bool isLocationEnabled = true;
 
   // DRIVERS ICON
   BitmapDescriptor driverIcon;
@@ -217,6 +220,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       tripSheetHigh = true;
     });
   }
+
+  mp.LatLng onTheWayPos = mp.LatLng(0, 0);
+  mp.LatLng onTheDestPos = mp.LatLng(0, 0);
 
   @override
   void initState() {
@@ -323,7 +329,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
               top: 30,
             ),
             mapType: MapType.normal,
-            myLocationEnabled: true,
+            myLocationEnabled: isLocationEnabled,
             compassEnabled: false,
             zoomControlsEnabled: true,
             zoomGesturesEnabled: true,
@@ -890,8 +896,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                   ),
                                   Text(
                                     (double.parse(tripDriverEstimatedKM) < 1)
-                                        ? 'Estimated ${tripDriverEstimatedM.toString()} Meters/${tripDriverEstimatedTime.toString()} Minutes'
-                                        : 'Estimated ${tripDriverEstimatedKM.toString()} KM/${tripDriverEstimatedTime.toString()} Minutes',
+                                        ? 'Estimated $tripDriverEstimatedM Meters/$tripDriverEstimatedTime Minutes'
+                                        : 'Estimated $tripDriverEstimatedKM KM/$tripDriverEstimatedTime Minutes',
                                     style: TextStyle(
                                         fontSize: 12,
                                         fontFamily: 'Bolt-Semibold',
@@ -1209,7 +1215,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           LatLng(nearbyDrivers.latitude, nearbyDrivers.longitude);
 
       Marker thisMarker = Marker(
-        markerId: MarkerId('driver&${nearbyDrivers.driverKey}'),
+        markerId: MarkerId('driver'),
         position: driversPosition,
         icon: driverIcon,
         rotation: Random().nextInt(360).toDouble(),
@@ -1463,10 +1469,10 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 .snapshot.value['driver_info']['driver_coords']['longitude']
                 .toString());
 
-            LatLng driverCoords = LatLng(driverLocLat, driverLocLng);
-            print('driver coords is $driverCoords');
+            driverCoords = LatLng(driverLocLat, driverLocLng);
+            updateDriverArrivalCoordsInfo(driverCoords);
 
-            updateDriverCoordsInfo(driverCoords);
+            updateOnTheWayDriver(driverCoords);
           }
 
           setState(() {
@@ -1474,8 +1480,13 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             isRequesting = false;
           });
 
-          showTripSheet();
-          // Geofire.stopListener();
+          if (!tripSheetHigh) {
+            showTripSheet();
+            Geofire.stopListener();
+
+            _marker.removeWhere(
+                (element) => element.markerId.value.toString() == 'driver');
+          }
         }
 
         if (tripStatus == 'picked') {
@@ -1488,24 +1499,40 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           setState(() {
             tripStatusText = 'On the way to destination';
           });
+
+          if (event.snapshot.value['driver_info']['driver_coords'] != null) {
+            // ! SAVE DRIVER COORDS
+            double driverLocLat = double.parse(event
+                .snapshot.value['driver_info']['driver_coords']['latitude']
+                .toString());
+            double driverLocLng = double.parse(event
+                .snapshot.value['driver_info']['driver_coords']['longitude']
+                .toString());
+
+            driverCoords = LatLng(driverLocLat, driverLocLng);
+
+            getLocationsUpdate(driverCoords);
+            updateDestinationArrivalCoordsInfo(driverCoords);
+          }
         }
 
         if (tripStatus == 'arrived') {
           setState(() {
             tripStatusText = 'You have arrived';
           });
-          Geofire.stopListener();
         }
       });
     });
   }
 
-  void updateDriverCoordsInfo(LatLng driverCoords) async {
+  void updateDriverArrivalCoordsInfo(LatLng driverCoords) async {
     if (!isRequestingDriverInfo) {
       isRequestingDriverInfo = true;
 
       var getDriverInfo = await HttpRequestMethod.findRoutes(driverCoords,
           LatLng(currentPosition.latitude, currentPosition.longitude));
+
+      if (getDriverInfo == null) return;
 
       setState(() {
         tripDriverEstimatedTime = getDriverInfo.destDuration;
@@ -1515,5 +1542,99 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
       isRequestingDriverInfo = false;
     }
+  }
+
+  void updateDestinationArrivalCoordsInfo(LatLng currentCoords) async {
+    if (!isRequestingDriverInfo) {
+      isRequestingDriverInfo = true;
+
+      var destPoint = Provider.of<AppData>(context, listen: false).destPoint;
+      var destLatLng = LatLng(destPoint.latitude, destPoint.longitude);
+
+      var getDriverInfo =
+          await HttpRequestMethod.findRoutes(currentCoords, destLatLng);
+
+      if (getDriverInfo == null) return;
+
+      setState(() {
+        tripDriverEstimatedTime = getDriverInfo.destDuration;
+        tripDriverEstimatedM = getDriverInfo.destDistanceM;
+        tripDriverEstimatedKM = getDriverInfo.destDistanceKM;
+      });
+
+      isRequestingDriverInfo = false;
+    }
+  }
+
+  void getLocationsUpdate(LatLng driverPositions) {
+    // COMPUTED ROTATIONS
+    var rotations = MapToolkitHelper.calcRotations(
+        onTheDestPos,
+        mp.LatLng(
+          driverPositions.latitude,
+          driverPositions.longitude,
+        ));
+
+    // SET MARKER
+    LatLng coords = LatLng(driverPositions.latitude, driverPositions.longitude);
+
+    Marker driverMarker = Marker(
+      markerId: MarkerId('driverIcon'),
+      icon: driverIcon,
+      position: coords,
+      rotation: rotations,
+    );
+
+    // UPDATE EVERYTHING ACCORDINGLY
+    setState(() {
+      isLocationEnabled = false;
+      // ANIMATE CAMERA
+      CameraPosition cameraPosition = CameraPosition(target: coords, zoom: 18);
+
+      mapController
+          .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+
+      // CLEAR DRIVERICON BEFORE ADD NEW
+      _marker.removeWhere((marker) => marker.markerId.value == 'driverIcon');
+
+      _marker.add(driverMarker);
+    });
+
+    // UPDATE DUMMY LATLNG
+    onTheDestPos =
+        mp.LatLng(driverPositions.latitude, driverPositions.longitude);
+  }
+
+  void updateOnTheWayDriver(LatLng driverCurrentPos) {
+    // COMPUTED ROTATIONS
+    var rotations = MapToolkitHelper.calcRotations(
+        onTheWayPos,
+        mp.LatLng(
+          driverCurrentPos.latitude,
+          driverCurrentPos.longitude,
+        ));
+
+    // SET MARKER
+    LatLng coords =
+        LatLng(driverCurrentPos.latitude, driverCurrentPos.longitude);
+
+    Marker driverMarker = Marker(
+      markerId: MarkerId('driverIcon'),
+      icon: driverIcon,
+      position: coords,
+      rotation: rotations,
+    );
+
+    // UPDATE EVERYTHING ACCORDINGLY
+    setState(() {
+      // CLEAR DRIVERICON BEFORE ADD NEW
+      _marker.removeWhere((marker) => marker.markerId.value == 'driverIcon');
+
+      _marker.add(driverMarker);
+    });
+
+    // UPDATE DUMMY LATLNG
+    onTheWayPos =
+        mp.LatLng(driverCurrentPos.latitude, driverCurrentPos.longitude);
   }
 }

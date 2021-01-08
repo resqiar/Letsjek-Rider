@@ -77,13 +77,17 @@ class HttpRequestMethod {
     // assign value to Model
     Routes routesModels = Routes();
 
-    routesModels.destDistanceM =
-        response["routes"][0]["distance"].toStringAsFixed(0);
-    routesModels.destDistanceKM =
-        (response["routes"][0]["distance"] / 1000).round().toStringAsFixed(0);
-    routesModels.destDuration =
-        (response["routes"][0]["duration"] / 60).round().toStringAsFixed(0);
-    routesModels.encodedPoints = response["routes"][0]["geometry"];
+    try {
+      routesModels.destDistanceM =
+          (response["routes"][0]["distance"]).round().toStringAsFixed(0);
+      routesModels.destDistanceKM =
+          (response["routes"][0]["distance"] / 1000).round().toStringAsFixed(0);
+      routesModels.destDuration =
+          (response["routes"][0]["duration"] / 60).round().toStringAsFixed(0);
+      routesModels.encodedPoints = response["routes"][0]["geometry"];
+    } on Exception catch (e) {
+      print('ERROR NIH : $e');
+    }
 
     return routesModels;
   }

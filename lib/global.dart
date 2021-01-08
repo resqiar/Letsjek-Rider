@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:uber_clone/models/CurrentUser.dart';
 
 String gmapsKey = "AIzaSyCM4XZY3uKnCmrIL3hatqO1drjqp-RhC6g";
@@ -19,6 +20,7 @@ int timerCountdown = 15;
 
 // TODO: MONITORING TRIP REQUEST
 StreamSubscription<Event> driverStatusRef;
+LatLng driverCoords;
 String tripStatus = '';
 String tripStatusText = '';
 String tripDriverFullName = '';
@@ -26,6 +28,6 @@ String tripDriverPhoneNumber = '';
 String tripDriverCarBrand = '';
 String tripDriverCarPlate = '';
 String tripDriverCarColor = '';
-String tripDriverEstimatedTime = '0';
+String tripDriverEstimatedTime = '';
 String tripDriverEstimatedKM = '0';
-String tripDriverEstimatedM = '0';
+String tripDriverEstimatedM = '';
