@@ -18,6 +18,7 @@ import 'package:uber_clone/helpers/MapToolkitHelper.dart';
 import 'package:uber_clone/models/NearbyDrivers.dart';
 import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
+import 'package:uber_clone/widgets/CashPaymentDialog.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
 import 'package:uber_clone/widgets/NoNearbyDriversDialog.dart';
 import 'package:uber_clone/widgets/ProgressDialogue.dart';
@@ -1413,9 +1414,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         }
 
         if (tripStatus == 'accepted') {
-          // Timer(Duration(seconds: 2), () {
-
-          // });
           // ! DRIVER NAME
           if (event.snapshot.value['driver_info']['driver_name'] != null) {
             setState(() {
@@ -1470,6 +1468,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 .toString());
 
             driverCoords = LatLng(driverLocLat, driverLocLng);
+            print('DRIVER COORDS: $driverCoords');
             updateDriverArrivalCoordsInfo(driverCoords);
 
             updateOnTheWayDriver(driverCoords);
@@ -1510,7 +1509,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 .toString());
 
             driverCoords = LatLng(driverLocLat, driverLocLng);
-
             getLocationsUpdate(driverCoords);
             updateDestinationArrivalCoordsInfo(driverCoords);
           }
@@ -1520,6 +1518,28 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           setState(() {
             tripStatusText = 'You have arrived';
           });
+
+          if (event.snapshot.value['fares_price'] != null) {
+            var fares = event.snapshot.value['fares_price'];
+
+            var response = await showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (BuildContext context) =>
+                  CashPaymentDialog(fares: fares),
+            );
+
+            if (response == 'payed') {
+              setState(() {
+                _marker.clear();
+                polylineCoords.clear();
+                _circle.clear();
+                isLocationEnabled = true;
+              });
+
+              resetApp();
+            }
+          }
         }
       });
     });
@@ -1533,6 +1553,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
           LatLng(currentPosition.latitude, currentPosition.longitude));
 
       if (getDriverInfo == null) return;
+
+      print(
+          'getDriverInfo: ${getDriverInfo.destDistanceM} Meter, ${getDriverInfo.destDistanceKM} KiloMeter');
 
       setState(() {
         tripDriverEstimatedTime = getDriverInfo.destDuration;
@@ -1636,5 +1659,24 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     // UPDATE DUMMY LATLNG
     onTheWayPos =
         mp.LatLng(driverCurrentPos.latitude, driverCurrentPos.longitude);
+  }
+
+  void resetApp() {
+    setState(() {
+      searchSheetHigh = true;
+      tripSheetHigh = false;
+      tripStatus = '';
+      tripStatusText = '';
+      tripDriverFullName = '';
+      tripDriverPhoneNumber = '';
+      tripDriverCarBrand = '';
+      tripDriverCarPlate = '';
+      tripDriverCarColor = '';
+      tripDriverEstimatedTime = '';
+      tripDriverEstimatedKM = '0';
+      tripDriverEstimatedM = '';
+    });
+
+    getCurrentPos();
   }
 }

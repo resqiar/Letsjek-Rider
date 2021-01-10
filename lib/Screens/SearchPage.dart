@@ -17,7 +17,7 @@ class _SearchPageState extends State<SearchPage> {
   var destTextController = TextEditingController();
 
   // ! DUMMY PREDICTIONS LIST ! //
-  List<PredictionsPlace> predictionsList = [];
+  List predictionsList = [];
 
   // ? Search Place Method ? //
   void searchPlace(String place) async {
@@ -37,7 +37,7 @@ class _SearchPageState extends State<SearchPage> {
     } else {
       // CONVERT JSON RESPONSE TO A LIST
       final convertToList =
-          (response as List).map((e) => PredictionsPlace.fromJson(e)).toList();
+          response.map((e) => PredictionsPlace.fromJson(e)).toList();
 
       setState(() {
         predictionsList = convertToList;

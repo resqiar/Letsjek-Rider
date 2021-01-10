@@ -33,10 +33,10 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+  final isLogin = FirebaseAuth.instance.currentUser;
+
   @override
   Widget build(BuildContext context) {
-    final isLogin = FirebaseAuth.instance.currentUser;
-
     return ChangeNotifierProvider(
       create: (context) => AppData(),
       child: MaterialApp(

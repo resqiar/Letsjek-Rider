@@ -64,7 +64,7 @@ class HttpRequestMethod {
     return address;
   }
 
-  static Future<Routes> findRoutes(LatLng pickupPoint, LatLng destPoint) async {
+  static Future findRoutes(LatLng pickupPoint, LatLng destPoint) async {
     // Get Response
     var URL =
         "https://us1.locationiq.com/v1/directions/driving/${pickupPoint.longitude},${pickupPoint.latitude};${destPoint.longitude},${destPoint.latitude}?key=$locationIQKeys&overview=full";
@@ -72,22 +72,26 @@ class HttpRequestMethod {
     var response = await HttpReqHelper.getRequest(URL);
 
     // if response failed
-    if (response == 'failed') return null;
+    if (response == 'Failed') {
+      return;
+    }
+    if (response == null) {
+      return;
+    }
+    if (response['code'].toString() != "Ok") {
+      return;
+    }
 
     // assign value to Model
     Routes routesModels = Routes();
 
-    try {
-      routesModels.destDistanceM =
-          (response["routes"][0]["distance"]).round().toStringAsFixed(0);
-      routesModels.destDistanceKM =
-          (response["routes"][0]["distance"] / 1000).round().toStringAsFixed(0);
-      routesModels.destDuration =
-          (response["routes"][0]["duration"] / 60).round().toStringAsFixed(0);
-      routesModels.encodedPoints = response["routes"][0]["geometry"];
-    } on Exception catch (e) {
-      print('ERROR NIH : $e');
-    }
+    routesModels.destDistanceM =
+        response["routes"][0]["distance"].round().toString();
+    routesModels.destDistanceKM =
+        (response["routes"][0]["distance"] / 1000).round().toString();
+    routesModels.destDuration =
+        (response["routes"][0]["duration"] / 60).round().toString();
+    routesModels.encodedPoints = response["routes"][0]["geometry"];
 
     return routesModels;
   }
