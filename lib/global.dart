@@ -31,3 +31,4 @@ String tripDriverCarColor = '';
 String tripDriverEstimatedTime = '';
 String tripDriverEstimatedKM = '0';
 String tripDriverEstimatedM = '';
+String tripDriverProfileURL = '';

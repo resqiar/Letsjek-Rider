@@ -78,9 +78,6 @@ class HttpRequestMethod {
     if (response == null) {
       return;
     }
-    if (response['code'].toString() != "Ok") {
-      return;
-    }
 
     // assign value to Model
     Routes routesModels = Routes();

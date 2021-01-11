@@ -7,7 +7,9 @@ import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:uber_clone/Screens/SearchPage.dart';
 import 'package:uber_clone/global.dart';
 import 'package:uber_clone/helpers/GeofireHelper.dart';
@@ -110,7 +112,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   bool requestSheetHigh = false;
   bool tripSheetHigh = false;
   bool isRequesting = false;
-  bool isRequestingDriverInfo = false;
 
   void showRequestSheet() async {
     // GET ROUTES
@@ -874,39 +875,58 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                               height: 8,
                             ),
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 24),
+                              padding: EdgeInsets.symmetric(horizontal: 2),
                               width: double.infinity,
                               color: Colors.green[100],
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  SizedBox(
-                                    height: 14,
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                        height: 14,
+                                      ),
+                                      Text(
+                                        tripDriverFullName,
+                                        style: TextStyle(
+                                            fontSize: 20,
+                                            fontFamily: 'Bolt-Semibold'),
+                                      ),
+                                      Text(
+                                        '$tripDriverCarBrand - $tripDriverCarPlate - $tripDriverCarColor',
+                                        style: TextStyle(
+                                            fontFamily: 'Bolt-Semibold'),
+                                      ),
+                                      Text(
+                                        (double.parse(tripDriverEstimatedKM) <
+                                                1)
+                                            ? 'Estimated $tripDriverEstimatedM Meters/$tripDriverEstimatedTime Minutes'
+                                            : 'Estimated $tripDriverEstimatedKM KM/$tripDriverEstimatedTime Minutes',
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontFamily: 'Bolt-Semibold',
+                                            color: Colors.grey),
+                                      ),
+                                      SizedBox(
+                                        height: 16,
+                                      ),
+                                    ],
                                   ),
-                                  Text(
-                                    tripDriverFullName,
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        fontFamily: 'Bolt-Semibold'),
-                                  ),
-                                  Text(
-                                    '$tripDriverCarBrand - $tripDriverCarPlate - $tripDriverCarColor',
-                                    style:
-                                        TextStyle(fontFamily: 'Bolt-Semibold'),
-                                  ),
-                                  Text(
-                                    (double.parse(tripDriverEstimatedKM) < 1)
-                                        ? 'Estimated $tripDriverEstimatedM Meters/$tripDriverEstimatedTime Minutes'
-                                        : 'Estimated $tripDriverEstimatedKM KM/$tripDriverEstimatedTime Minutes',
-                                    style: TextStyle(
-                                        fontSize: 12,
-                                        fontFamily: 'Bolt-Semibold',
-                                        color: Colors.grey),
-                                  ),
-                                  SizedBox(
-                                    height: 16,
-                                  ),
+                                  (tripDriverProfileURL != null)
+                                      ? Container(
+                                          child: FadeInImage.memoryNetwork(
+                                            placeholder: kTransparentImage,
+                                            image: tripDriverProfileURL,
+                                            height: 100,
+                                            width: 100,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        )
+                                      : Container(),
                                 ],
                               ),
                             ),
@@ -1401,191 +1421,196 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       setState(() {
         rideRequestKey = requestDBRef.key;
       });
+    });
 
-      // ! LISTEN TO CHANGED VALUE
-      driverStatusRef = requestDBRef.onValue.listen((event) async {
-        // null safety
-        if (event.snapshot.value == null) {
-          return;
-        }
+    // ! LISTEN TO CHANGED VALUE
+    driverStatusRef = requestDBRef.onValue.listen((event) async {
+      // null safety
+      if (event.snapshot.value == null) {
+        return;
+      }
 
-        if (event.snapshot.value['status'] != null) {
-          tripStatus = event.snapshot.value['status'].toString();
-        }
+      if (event.snapshot.value['status'] != null) {
+        tripStatus = event.snapshot.value['status'].toString();
+      }
 
-        if (tripStatus == 'accepted') {
-          // ! DRIVER NAME
-          if (event.snapshot.value['driver_info']['driver_name'] != null) {
-            setState(() {
-              tripDriverFullName =
-                  event.snapshot.value['driver_info']['driver_name'].toString();
-            });
-          }
-
-          // ! DRIVER PHONE
-          if (event.snapshot.value['driver_info']['driver_phone'] != null) {
-            setState(() {
-              tripDriverPhoneNumber = event
-                  .snapshot.value['driver_info']['driver_phone']
-                  .toString();
-            });
-          }
-
-          // ! DRIVER CAR BRAND
-          if (event.snapshot.value['driver_info']['vehicle_name'] != null) {
-            setState(() {
-              tripDriverCarBrand = event
-                  .snapshot.value['driver_info']['vehicle_name']
-                  .toString();
-            });
-          }
-
-          // ! DRIVER CAR PLATE NUMBER
-          if (event.snapshot.value['driver_info']['vehicle_number'] != null) {
-            setState(() {
-              tripDriverCarPlate = event
-                  .snapshot.value['driver_info']['vehicle_number']
-                  .toString();
-            });
-          }
-
-          // ! DRIVER CAR COLOR
-          if (event.snapshot.value['driver_info']['vehicle_color'] != null) {
-            setState(() {
-              tripDriverCarColor = event
-                  .snapshot.value['driver_info']['vehicle_color']
-                  .toString();
-            });
-          }
-
-          if (event.snapshot.value['driver_info']['driver_coords'] != null) {
-            // ! SAVE DRIVER COORDS
-            double driverLocLat = double.parse(event
-                .snapshot.value['driver_info']['driver_coords']['latitude']
-                .toString());
-            double driverLocLng = double.parse(event
-                .snapshot.value['driver_info']['driver_coords']['longitude']
-                .toString());
-
-            driverCoords = LatLng(driverLocLat, driverLocLng);
-            print('DRIVER COORDS: $driverCoords');
-            updateDriverArrivalCoordsInfo(driverCoords);
-
-            updateOnTheWayDriver(driverCoords);
-          }
+      if (tripStatus == 'accepted') {
+        // ! DRIVER ID
+        if (event.snapshot.value['driver_id'].toString() != 'waiting') {
+          var driverID = event.snapshot.value['driver_id'].toString();
+          var driverProfile = await getDriverProfile(driverID);
 
           setState(() {
-            tripStatusText = 'Driver is on the way';
-            isRequesting = false;
-          });
-
-          if (!tripSheetHigh) {
-            showTripSheet();
-            Geofire.stopListener();
-
-            _marker.removeWhere(
-                (element) => element.markerId.value.toString() == 'driver');
-          }
-        }
-
-        if (tripStatus == 'picked') {
-          setState(() {
-            tripStatusText = 'Driver is arrived';
+            tripDriverProfileURL = driverProfile;
           });
         }
 
-        if (tripStatus == 'transporting') {
+        // ! DRIVER NAME
+        if (event.snapshot.value['driver_info']['driver_name'] != null) {
           setState(() {
-            tripStatusText = 'On the way to destination';
+            tripDriverFullName =
+                event.snapshot.value['driver_info']['driver_name'].toString();
           });
-
-          if (event.snapshot.value['driver_info']['driver_coords'] != null) {
-            // ! SAVE DRIVER COORDS
-            double driverLocLat = double.parse(event
-                .snapshot.value['driver_info']['driver_coords']['latitude']
-                .toString());
-            double driverLocLng = double.parse(event
-                .snapshot.value['driver_info']['driver_coords']['longitude']
-                .toString());
-
-            driverCoords = LatLng(driverLocLat, driverLocLng);
-            getLocationsUpdate(driverCoords);
-            updateDestinationArrivalCoordsInfo(driverCoords);
-          }
         }
 
-        if (tripStatus == 'arrived') {
+        // ! DRIVER PHONE
+        if (event.snapshot.value['driver_info']['driver_phone'] != null) {
           setState(() {
-            tripStatusText = 'You have arrived';
+            tripDriverPhoneNumber =
+                event.snapshot.value['driver_info']['driver_phone'].toString();
           });
+        }
 
-          if (event.snapshot.value['fares_price'] != null) {
-            var fares = event.snapshot.value['fares_price'];
+        // ! DRIVER CAR BRAND
+        if (event.snapshot.value['driver_info']['vehicle_name'] != null) {
+          setState(() {
+            tripDriverCarBrand =
+                event.snapshot.value['driver_info']['vehicle_name'].toString();
+          });
+        }
 
-            var response = await showDialog(
-              context: context,
-              barrierDismissible: false,
-              builder: (BuildContext context) =>
-                  CashPaymentDialog(fares: fares),
-            );
+        // ! DRIVER CAR PLATE NUMBER
+        if (event.snapshot.value['driver_info']['vehicle_number'] != null) {
+          setState(() {
+            tripDriverCarPlate = event
+                .snapshot.value['driver_info']['vehicle_number']
+                .toString();
+          });
+        }
 
-            if (response == 'payed') {
-              setState(() {
-                _marker.clear();
-                polylineCoords.clear();
-                _circle.clear();
-                isLocationEnabled = true;
-              });
+        // ! DRIVER CAR COLOR
+        if (event.snapshot.value['driver_info']['vehicle_color'] != null) {
+          setState(() {
+            tripDriverCarColor =
+                event.snapshot.value['driver_info']['vehicle_color'].toString();
+          });
+        }
 
-              resetApp();
-            }
+        // ! SAVE DRIVER COORDS
+        double driverLocLat = double.parse(event
+            .snapshot.value['driver_info']['driver_coords']['latitude']
+            .toString());
+        double driverLocLng = double.parse(event
+            .snapshot.value['driver_info']['driver_coords']['longitude']
+            .toString());
+
+        driverCoords = LatLng(driverLocLat, driverLocLng);
+        await updateDriverArrivalCoordsInfo(driverCoords);
+        updateOnTheWayDriver(driverCoords);
+
+        setState(() {
+          tripStatusText = 'Driver is on the way';
+          isRequesting = false;
+        });
+
+        if (!tripSheetHigh) {
+          showTripSheet();
+          Geofire.stopListener();
+
+          _marker.removeWhere(
+              (element) => element.markerId.value.toString() == 'driver');
+        }
+      }
+
+      if (tripStatus == 'picked') {
+        setState(() {
+          tripStatusText = 'Driver is arrived';
+        });
+      }
+
+      if (tripStatus == 'transporting') {
+        setState(() {
+          tripStatusText = 'On the way to destination';
+        });
+
+        // ! SAVE DRIVER COORDS
+        double driverLocLat = double.parse(event
+            .snapshot.value['driver_info']['driver_coords']['latitude']
+            .toString());
+        double driverLocLng = double.parse(event
+            .snapshot.value['driver_info']['driver_coords']['longitude']
+            .toString());
+
+        driverCoords = LatLng(driverLocLat, driverLocLng);
+        await updateDestinationArrivalCoordsInfo(driverCoords);
+        getLocationsUpdate(driverCoords);
+      }
+
+      if (tripStatus == 'arrived') {
+        setState(() {
+          tripStatusText = 'You have arrived';
+        });
+
+        if (event.snapshot.value['fares_price'] != null) {
+          var fares = event.snapshot.value['fares_price'];
+          String formattedFares = NumberFormat.currency(
+            locale: 'id',
+            symbol: 'IDR ',
+            decimalDigits: 0,
+          ).format(int.parse(fares));
+
+          var response = await showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) =>
+                CashPaymentDialog(fares: formattedFares),
+          );
+
+          if (response == 'payed') {
+            setState(() {
+              _marker.clear();
+              polylineCoords.clear();
+              _circle.clear();
+              isLocationEnabled = true;
+            });
+
+            resetApp();
           }
         }
-      });
+      }
     });
   }
 
-  void updateDriverArrivalCoordsInfo(LatLng driverCoords) async {
-    if (!isRequestingDriverInfo) {
-      isRequestingDriverInfo = true;
+  Future<String> getDriverProfile(String driverID) async {
+    DatabaseReference driverDBRef = FirebaseDatabase.instance
+        .reference()
+        .child('drivers/$driverID/profile_url');
 
-      var getDriverInfo = await HttpRequestMethod.findRoutes(driverCoords,
-          LatLng(currentPosition.latitude, currentPosition.longitude));
+    var profileURL = await driverDBRef.once().then((DataSnapshot dataSnapshot) {
+      if (dataSnapshot != null) {
+        return dataSnapshot.value.toString();
+      }
+    });
 
-      if (getDriverInfo == null) return;
+    return profileURL;
+  }
 
-      print(
-          'getDriverInfo: ${getDriverInfo.destDistanceM} Meter, ${getDriverInfo.destDistanceKM} KiloMeter');
+  Future updateDriverArrivalCoordsInfo(LatLng driverCoords) async {
+    var getDriverInfo = await HttpRequestMethod.findRoutes(driverCoords,
+        LatLng(currentPosition.latitude, currentPosition.longitude));
 
+    if (getDriverInfo != null) {
       setState(() {
         tripDriverEstimatedTime = getDriverInfo.destDuration;
         tripDriverEstimatedM = getDriverInfo.destDistanceM;
         tripDriverEstimatedKM = getDriverInfo.destDistanceKM;
       });
-
-      isRequestingDriverInfo = false;
     }
   }
 
-  void updateDestinationArrivalCoordsInfo(LatLng currentCoords) async {
-    if (!isRequestingDriverInfo) {
-      isRequestingDriverInfo = true;
+  Future updateDestinationArrivalCoordsInfo(LatLng currentCoords) async {
+    var destPoint = Provider.of<AppData>(context, listen: false).destPoint;
+    var destLatLng = LatLng(destPoint.latitude, destPoint.longitude);
 
-      var destPoint = Provider.of<AppData>(context, listen: false).destPoint;
-      var destLatLng = LatLng(destPoint.latitude, destPoint.longitude);
+    var getDriverInfo =
+        await HttpRequestMethod.findRoutes(currentCoords, destLatLng);
 
-      var getDriverInfo =
-          await HttpRequestMethod.findRoutes(currentCoords, destLatLng);
-
-      if (getDriverInfo == null) return;
-
+    if (getDriverInfo != null) {
       setState(() {
         tripDriverEstimatedTime = getDriverInfo.destDuration;
         tripDriverEstimatedM = getDriverInfo.destDistanceM;
         tripDriverEstimatedKM = getDriverInfo.destDistanceKM;
       });
-
-      isRequestingDriverInfo = false;
     }
   }
 

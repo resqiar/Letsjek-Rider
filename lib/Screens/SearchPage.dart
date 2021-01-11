@@ -32,7 +32,7 @@ class _SearchPageState extends State<SearchPage> {
     var response = await HttpReqHelper.getRequest(URL);
 
     // CHECK IF FAILED
-    if (response == 'failed' || response == null) {
+    if (response == 'Failed' || response == null) {
       return;
     } else {
       // CONVERT JSON RESPONSE TO A LIST
