@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,6 @@ import 'package:uber_clone/Screens/SearchPage.dart';
 import 'package:uber_clone/global.dart';
 import 'package:uber_clone/helpers/GeofireHelper.dart';
 import 'package:uber_clone/helpers/HttpRequestMethod.dart';
-import 'package:http/http.dart' as http;
 import 'package:maps_toolkit/maps_toolkit.dart' as mp;
 import 'package:uber_clone/helpers/MapToolkitHelper.dart';
 import 'package:uber_clone/models/NearbyDrivers.dart';
@@ -269,7 +267,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              'Admin',
+                              (currentUser.userFullname != null)
+                                  ? currentUser.userFullname
+                                  : '',
                               style: TextStyle(
                                 fontFamily: 'Bolt-Semibold',
                                 fontSize: 16,
@@ -1073,7 +1073,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         String driverToken = dataSnapshot.value.toString();
 
         // SEND NOTIFICATIONS TO DRIVER BY ITS TOKEN
-        sendMessage(driverToken, rideRequestKey);
+        HttpRequestMethod.sendMessageToDrivers(driverToken, rideRequestKey);
       } else {
         return;
       }
@@ -1119,35 +1119,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
         }
       });
     });
-  }
-
-  void sendMessage(
-    String driverToken,
-    String tripID,
-  ) async {
-    await http.post(
-      'https://fcm.googleapis.com/fcm/send',
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': FCM_SERVER_KEYS,
-      },
-      body: jsonEncode(
-        <String, dynamic>{
-          'notification': <String, dynamic>{
-            'body': 'Rider requesting trip near your locations. Tap here!',
-            'title': 'New Trip Request is Available',
-          },
-          'priority': 'high',
-          'data': <String, dynamic>{
-            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-            'id': '1',
-            'status': 'done',
-            'request_id': tripID,
-          },
-          'to': driverToken
-        },
-      ),
-    );
   }
 
   void getAvailableDrivers() {
@@ -1333,17 +1304,6 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
 
     // UPDATE CAMERA
     mapController.animateCamera(CameraUpdate.newLatLngBounds(bounds, 50));
-
-    // ADD A MARKER
-    // Marker pickupMarker = Marker(
-    //   markerId: MarkerId('pickup'),
-    //   icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
-    //   infoWindow: InfoWindow(
-    //     title: pickupPoint.formattedAddress,
-    //     snippet: 'Lat: ${pickupPoint.latitude}; Lng: ${pickupPoint.longitude}',
-    //   ),
-    //   position: pickupLatLng,
-    // );
 
     Marker destMarker = Marker(
       markerId: MarkerId('dest'),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:connectivity/connectivity.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -11,6 +13,8 @@ import 'package:uber_clone/models/CurrentUser.dart';
 import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/global.dart';
+
+import 'package:http/http.dart' as http;
 
 class HttpRequestMethod {
   static getCurrentUserData() {
@@ -120,5 +124,34 @@ class HttpRequestMethod {
     int totalCalc = (baseFares + distFares + timeFares).toInt();
 
     return totalCalc;
+  }
+
+  static void sendMessageToDrivers(
+    String driverToken,
+    String tripID,
+  ) async {
+    await http.post(
+      'https://fcm.googleapis.com/fcm/send',
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': FCM_SERVER_KEYS,
+      },
+      body: jsonEncode(
+        <String, dynamic>{
+          'notification': <String, dynamic>{
+            'body': 'Rider requesting trip near your locations. Tap here!',
+            'title': 'New Trip Request is Available',
+          },
+          'priority': 'high',
+          'data': <String, dynamic>{
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'id': '1',
+            'status': 'done',
+            'request_id': tripID,
+          },
+          'to': driverToken
+        },
+      ),
+    );
   }
 }
