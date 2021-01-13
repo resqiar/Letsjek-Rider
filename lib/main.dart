@@ -30,10 +30,16 @@ Future<void> main() async {
             databaseURL: 'https://letsjek.firebaseio.com',
           ),
   );
-  runApp(MyApp());
+  final savedThemeMode = await AdaptiveTheme.getThemeMode();
+
+  runApp(MyApp(savedThemeMode: savedThemeMode));
 }
 
 class MyApp extends StatelessWidget {
+  AdaptiveThemeMode savedThemeMode;
+
+  MyApp({this.savedThemeMode});
+
   final isLogin = FirebaseAuth.instance.currentUser;
 
   @override
@@ -57,7 +63,7 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Bolt-Regular',
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        initial: AdaptiveThemeMode.dark,
+        initial: savedThemeMode ?? AdaptiveThemeMode.system,
         builder: (theme, darkTheme) => MaterialApp(
           theme: theme,
           darkTheme: darkTheme,

@@ -321,7 +321,10 @@ class _MainPageState extends State<MainPage>
                   children: [
                     (isLoading)
                         ? CircularProgressIndicator(
-                            backgroundColor: Colors.deepPurple,
+                            backgroundColor: (Theme.of(context).brightness ==
+                                    Brightness.dark)
+                                ? Colors.deepPurple
+                                : Colors.deepOrange,
                           )
                         : Image.asset(
                             'resources/images/user_icon.png',
@@ -566,7 +569,11 @@ class _MainPageState extends State<MainPage>
                             children: [
                               (isLoading)
                                   ? CircularProgressIndicator(
-                                      backgroundColor: Colors.deepPurple,
+                                      backgroundColor:
+                                          (Theme.of(context).brightness ==
+                                                  Brightness.dark)
+                                              ? Colors.deepPurple
+                                              : Colors.deepOrange,
                                     )
                                   : Icon(Icons.search, color: Colors.grey),
                               SizedBox(width: 8),
