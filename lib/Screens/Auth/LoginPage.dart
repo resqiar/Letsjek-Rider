@@ -76,12 +76,9 @@ class _LoginPageState extends State<LoginPage> {
             ),
             Image(
               alignment: Alignment.center,
-              height: 100,
-              width: 100,
-              image: AssetImage('resources/images/logo.png'),
-            ),
-            SizedBox(
-              height: 40,
+              height: 200.0,
+              width: 200.0,
+              image: AssetImage('resources/images/icon_cropped.png'),
             ),
             Text(
               'Sign in as a rider',

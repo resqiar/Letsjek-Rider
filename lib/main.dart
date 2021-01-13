@@ -36,7 +36,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  AdaptiveThemeMode savedThemeMode;
+  final AdaptiveThemeMode savedThemeMode;
 
   MyApp({this.savedThemeMode});
 

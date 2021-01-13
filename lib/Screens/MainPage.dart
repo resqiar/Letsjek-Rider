@@ -280,23 +280,21 @@ class _MainPageState extends State<MainPage>
   }
 
   bool isLoading = false;
-
+  bool isInitializing = true;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    setState(() {
-      isLoading = true;
+    HttpRequestMethod.getCurrentUserData().whenComplete(() {
+      setState(() {
+        isInitializing = false;
+      });
     });
-    HttpRequestMethod.getCurrentUserData();
 
     //
     Wakelock.enable();
     WidgetsBinding.instance.addObserver(this);
     getMapSettings();
-    setState(() {
-      isLoading = true;
-    });
   }
 
   @override
@@ -340,7 +338,7 @@ class _MainPageState extends State<MainPage>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          (isLoading)
+                          (isInitializing)
                               ? Text(
                                   '',
                                   style: TextStyle(
@@ -968,7 +966,7 @@ class _MainPageState extends State<MainPage>
                     curve: Curves.easeIn,
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(15),
                             topRight: Radius.circular(15)),
@@ -1010,7 +1008,10 @@ class _MainPageState extends State<MainPage>
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 2),
                               width: double.infinity,
-                              color: Colors.green[100],
+                              color: (Theme.of(context).brightness ==
+                                      Brightness.dark)
+                                  ? Colors.deepPurple
+                                  : Colors.orangeAccent[100],
                               child: Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
@@ -1079,11 +1080,19 @@ class _MainPageState extends State<MainPage>
                                         borderRadius: BorderRadius.all(
                                             Radius.circular((25))),
                                         border: Border.all(
-                                            width: 1.5, color: Colors.green),
+                                            width: 1.5,
+                                            color:
+                                                (Theme.of(context).brightness ==
+                                                        Brightness.dark)
+                                                    ? Colors.deepPurple
+                                                    : Colors.orangeAccent[100]),
                                       ),
                                       child: Icon(
                                         Icons.call,
-                                        color: Colors.green,
+                                        color: (Theme.of(context).brightness ==
+                                                Brightness.dark)
+                                            ? Colors.deepPurple
+                                            : Colors.orangeAccent[100],
                                       ),
                                     ),
                                     SizedBox(
@@ -1092,7 +1101,7 @@ class _MainPageState extends State<MainPage>
                                     Text(
                                       'Call',
                                       style: TextStyle(
-                                        color: Colors.green,
+                                        color: Colors.deepOrangeAccent,
                                         fontFamily: 'Bolt-Semibold',
                                       ),
                                     ),
@@ -1108,10 +1117,19 @@ class _MainPageState extends State<MainPage>
                                         borderRadius: BorderRadius.all(
                                             Radius.circular((25))),
                                         border: Border.all(
-                                            width: 1.5, color: Colors.green),
+                                            width: 1.5,
+                                            color:
+                                                (Theme.of(context).brightness ==
+                                                        Brightness.dark)
+                                                    ? Colors.deepPurple
+                                                    : Colors.orangeAccent[100]),
                                       ),
-                                      child:
-                                          Icon(Icons.list, color: Colors.green),
+                                      child: Icon(Icons.list,
+                                          color:
+                                              (Theme.of(context).brightness ==
+                                                      Brightness.dark)
+                                                  ? Colors.deepPurple
+                                                  : Colors.orangeAccent[100]),
                                     ),
                                     SizedBox(
                                       height: 10,
@@ -1119,7 +1137,7 @@ class _MainPageState extends State<MainPage>
                                     Text(
                                       'Details',
                                       style: TextStyle(
-                                        color: Colors.green,
+                                        color: Colors.deepOrangeAccent,
                                         fontFamily: 'Bolt-Semibold',
                                       ),
                                     ),

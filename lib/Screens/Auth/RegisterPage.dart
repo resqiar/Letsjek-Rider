@@ -95,12 +95,9 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             Image(
               alignment: Alignment.center,
-              height: 100,
-              width: 100,
-              image: AssetImage('resources/images/logo.png'),
-            ),
-            SizedBox(
-              height: 40,
+              height: 200,
+              width: 200,
+              image: AssetImage('resources/images/icon_cropped.png'),
             ),
             Text(
               'Sign up new rider\'s account',

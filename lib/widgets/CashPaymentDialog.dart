@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:uber_clone/widgets/CustomOutlinedButton.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
-import 'package:uber_clone/widgets/ProgressDialogue.dart';
 
 class CashPaymentDialog extends StatelessWidget {
   final String fares;
@@ -14,7 +13,7 @@ class CashPaymentDialog extends StatelessWidget {
     return Dialog(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).primaryColor,
       child: Container(
         width: double.infinity,
         child: Column(
@@ -63,7 +62,7 @@ class CashPaymentDialog extends StatelessWidget {
               height: 18,
             ),
             CustomOutlinedButton(
-              color: Colors.blue,
+              color: Colors.deepPurple,
               fontIsBold: true,
               textColor: Colors.white,
               title: 'PAY CASH',
