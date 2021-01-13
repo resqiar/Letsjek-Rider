@@ -1,10 +1,10 @@
 import 'package:firebase_database/firebase_database.dart';
 
 class CurrentUser {
-  String userId;
-  String userEmail;
-  String userPhone;
-  String userFullname;
+  String userId = ' ';
+  String userEmail = ' ';
+  String userPhone = ' ';
+  String userFullname = ' ';
 
   CurrentUser({
     this.userId,

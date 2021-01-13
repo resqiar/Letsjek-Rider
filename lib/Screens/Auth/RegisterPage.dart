@@ -86,7 +86,7 @@ class _RegisterPageState extends State<RegisterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).primaryColor,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -187,7 +187,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   SizedBox(
                     height: 30,
                   ),
-                  SubmitFlatButton("Sign up", Colors.green, () async {
+                  SubmitFlatButton("Sign up", Colors.deepPurple, () async {
                     // check network validation
                     final connectivityResult =
                         await Connectivity().checkConnectivity();

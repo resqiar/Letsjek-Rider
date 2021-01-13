@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:adaptive_theme/adaptive_theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,11 +22,13 @@ import 'package:uber_clone/models/NearbyDrivers.dart';
 import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/widgets/CashPaymentDialog.dart';
+import 'package:uber_clone/widgets/ConfirmLogoutDialog.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
 import 'package:uber_clone/widgets/NoNearbyDriversDialog.dart';
 import 'package:uber_clone/widgets/ProgressDialogue.dart';
 import 'package:uber_clone/widgets/SubmitFlatButton.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:wakelock/wakelock.dart';
 
 class MainPage extends StatefulWidget {
   static const id = 'mainpage';
@@ -32,7 +37,8 @@ class MainPage extends StatefulWidget {
   _MainPageState createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
+class _MainPageState extends State<MainPage>
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   // SNACKBAR
@@ -62,6 +68,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   void getCurrentPos() async {
     bool serviceEnabled;
     LocationPermission locPermit;
+    setState(() {
+      isLoading = true;
+    });
 
     // check if service enabled or not
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -87,10 +96,14 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       mapController.animateCamera(CameraUpdate.newCameraPosition(mapsCamera));
 
       // GEOCODE
-      String address = await HttpRequestMethod.findAddressByCoord(pos, context);
+      await HttpRequestMethod.findAddressByCoord(pos, context);
 
       // GET AVAILABLE DRIVERS
       getAvailableDrivers();
+
+      setState(() {
+        isLoading = false;
+      });
     } catch (e) {
       showSnackbar(e.toString());
     }
@@ -224,17 +237,73 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
   mp.LatLng onTheWayPos = mp.LatLng(0, 0);
   mp.LatLng onTheDestPos = mp.LatLng(0, 0);
 
+  String _darkStyle;
+
+  void changeMapMode(context) {
+    // DEVICE THEME
+    if (Theme.of(context).brightness == Brightness.dark) {
+      setMapStyle(_darkStyle);
+    } else {
+      setMapStyle("[]");
+    }
+  }
+
+  void changeSettingsMapMode(bool isDarkModeOn) {
+    // DEVICE THEME
+    if (isDarkModeOn) {
+      setMapStyle(_darkStyle);
+    } else {
+      setMapStyle("[]");
+    }
+  }
+
+  Future getMapSettings() async {
+    _darkStyle =
+        await rootBundle.loadString('resources/settings/map/darkMap.json');
+  }
+
+  void setMapStyle(String mapStyle) {
+    mapController.setMapStyle(mapStyle);
+  }
+
+  bool isOnDarkMode;
+  bool isOnLightMode;
+
+  void getDeviceSettings() {
+    if (Theme.of(context).brightness == Brightness.dark) {
+      isOnDarkMode = true;
+      isOnLightMode = false;
+    } else {
+      isOnDarkMode = false;
+      isOnLightMode = true;
+    }
+  }
+
+  bool isLoading = false;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    setState(() {
+      isLoading = true;
+    });
     HttpRequestMethod.getCurrentUserData();
+
+    //
+    Wakelock.enable();
+    WidgetsBinding.instance.addObserver(this);
+    getMapSettings();
+    setState(() {
+      isLoading = true;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    HttpRequestMethod.getCurrentUserData();
+    getDeviceSettings();
     createDriverMarker();
-
     return Scaffold(
       key: _scaffoldKey,
       drawer: Container(
@@ -247,51 +316,59 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             children: [
               Container(
                 height: 150,
-                color: Colors.white,
-                padding: EdgeInsets.all(8),
-                child: DrawerHeader(
-                  child: Row(
-                    children: [
-                      Image.asset(
-                        'resources/images/user_icon.png',
-                        height: 55,
-                        width: 55,
-                      ),
-                      SizedBox(
-                        width: 8,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              (currentUser.userFullname != null)
-                                  ? currentUser.userFullname
-                                  : '',
-                              style: TextStyle(
-                                fontFamily: 'Bolt-Semibold',
-                                fontSize: 16,
-                              ),
+                padding: EdgeInsets.all(18),
+                child: Row(
+                  children: [
+                    (isLoading)
+                        ? CircularProgressIndicator(
+                            backgroundColor: Colors.deepPurple,
+                          )
+                        : Image.asset(
+                            'resources/images/user_icon.png',
+                            height: 55,
+                            width: 55,
+                          ),
+                    SizedBox(
+                      width: 8,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          (isLoading)
+                              ? Text(
+                                  '',
+                                  style: TextStyle(
+                                    fontFamily: 'Bolt-Semibold',
+                                    fontSize: 16,
+                                  ),
+                                )
+                              : Text(
+                                  currentUser.userFullname,
+                                  style: TextStyle(
+                                    fontFamily: 'Bolt-Semibold',
+                                    fontSize: 16,
+                                  ),
+                                ),
+                          SizedBox(
+                            height: 2,
+                          ),
+                          Text(
+                            'View profile',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
                             ),
-                            SizedBox(
-                              height: 2,
-                            ),
-                            Text(
-                              'View profile',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+              ListDivider(),
               SizedBox(
                 height: 12,
               ),
@@ -307,13 +384,45 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                 leading: Icon(Icons.history),
                 title: Text('Ride History'),
               ),
+              CheckboxListTile(
+                secondary: Icon(Icons.nights_stay_outlined),
+                title: Text('Dark Mode'),
+                value: (isOnDarkMode) ? true : false,
+                onChanged: (bool value) {
+                  setState(() {
+                    isOnDarkMode = value;
+                    changeSettingsMapMode(isOnDarkMode);
+                    AdaptiveTheme.of(context).toggleThemeMode();
+                  });
+                },
+                subtitle: Text(
+                  'Reduces eye strain',
+                  style: TextStyle(fontSize: 12),
+                ),
+                activeColor: Colors.white,
+                checkColor: Colors.black,
+              ),
               ListTile(
                 leading: Icon(Icons.support_agent_outlined),
                 title: Text('Support'),
               ),
               ListTile(
-                leading: Icon(Icons.info_outline),
-                title: Text('About'),
+                leading: Icon(Icons.exit_to_app),
+                title: Text('Sign Out'),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) => ConfirmLogoutDialog(
+                      onpress: () async {
+                        await FirebaseAuth.instance.signOut();
+
+                        // if everything is okay then push user to MainPage
+                        Navigator.pushNamedAndRemoveUntil(
+                            context, 'loginpage', (route) => false);
+                      },
+                    ),
+                  );
+                },
               ),
             ],
           ),
@@ -343,36 +452,39 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
               mapController = controller;
+              changeMapMode(context);
 
               // ! After map ready bind user's current locations
               getCurrentPos();
             },
           ),
-          Positioned(
-            top: 35,
-            left: 12,
-            child: GestureDetector(
-              onTap: () {
-                _scaffoldKey.currentState.openDrawer();
-              },
-              child: Container(
-                padding: EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black26,
-                      spreadRadius: 1.5,
-                      blurRadius: 0.5,
-                      offset: Offset(0.5, 0.5),
+          (searchSheetHigh)
+              ? Positioned(
+                  top: 35,
+                  left: 12,
+                  child: GestureDetector(
+                    onTap: () {
+                      _scaffoldKey.currentState.openDrawer();
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            spreadRadius: 1.5,
+                            blurRadius: 0.5,
+                            offset: Offset(0.5, 0.5),
+                          ),
+                        ],
+                      ),
+                      child: Icon(Icons.keyboard_arrow_right),
                     ),
-                  ],
-                ),
-                child: Icon(Icons.keyboard_arrow_right),
-              ),
-            ),
-          ),
+                  ),
+                )
+              : Container(),
           Positioned(
             left: 0,
             right: 0,
@@ -386,7 +498,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     ? MediaQuery.of(context).size.height * 0.38
                     : 0,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: (Theme.of(context).brightness == Brightness.dark)
+                      ? Theme.of(context).primaryColor
+                      : Colors.white,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
@@ -414,25 +528,30 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       ),
                       SizedBox(height: 16),
                       GestureDetector(
-                        onTap: () async {
-                          var response = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SearchPage()));
+                        onTap: (!isLoading)
+                            ? () async {
+                                var response = await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => SearchPage()));
 
-                          // ! WHEN USER CAME BACK FROM SEARCH || IT CARRY A TRIGGER
-                          // ? What Trigger?
-                          // Basically this trigger is going on to activate getRoutes() method
-                          // to actually run the data that user has chosen in search page
-                          // when user came back from search page, its expected to render the routes
-                          if (response == 'getroutesnow') {
-                            showRequestSheet();
-                          }
-                        },
+                                // ! WHEN USER CAME BACK FROM SEARCH || IT CARRY A TRIGGER
+                                // ? What Trigger?
+                                // Basically this trigger is going on to activate getRoutes() method
+                                // to actually run the data that user has chosen in search page
+                                // when user came back from search page, its expected to render the routes
+                                if (response == 'getroutesnow') {
+                                  showRequestSheet();
+                                }
+                              }
+                            : () {},
                         child: Container(
                           padding: EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: (Theme.of(context).brightness ==
+                                    Brightness.dark)
+                                ? Colors.black38
+                                : Colors.white,
                             borderRadius: BorderRadius.circular(100),
                             boxShadow: [
                               BoxShadow(
@@ -445,7 +564,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.search, color: Colors.grey),
+                              (isLoading)
+                                  ? CircularProgressIndicator(
+                                      backgroundColor: Colors.deepPurple,
+                                    )
+                                  : Icon(Icons.search, color: Colors.grey),
                               SizedBox(width: 8),
                               Text(
                                 'Search Destination...',
@@ -538,7 +661,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     ? MediaQuery.of(context).size.height * 0.3
                     : 0,
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).primaryColor,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
@@ -612,7 +735,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                       ),
                       Container(
                         width: double.infinity,
-                        color: Colors.green[50],
+                        color: (Theme.of(context).brightness == Brightness.dark)
+                            ? Colors.deepPurple
+                            : Colors.orangeAccent[100],
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           child: Row(
@@ -642,9 +767,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                             : '${_routes.destDistanceKM}km/${_routes.destDistanceM}m'
                                         : '',
                                     style: TextStyle(
-                                      fontSize: 14,
-                                      color: Colors.grey,
-                                    ),
+                                        fontSize: 14,
+                                        fontFamily: 'Bolt-Semibold'),
                                   ),
                                 ],
                               ),
@@ -690,7 +814,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: SubmitFlatButton(
                           'REQUEST DRIVER',
-                          Colors.green,
+                          (Theme.of(context).brightness == Brightness.dark)
+                              ? Colors.deepPurple
+                              : Colors.deepOrangeAccent,
                           () {
                             isNowRequesting();
 
@@ -720,7 +846,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     child: Container(
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.redAccent,
+                        color: Colors.deepOrange,
                         borderRadius: BorderRadius.circular(100),
                         boxShadow: [
                           BoxShadow(
@@ -750,7 +876,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   child: Container(
                     height: MediaQuery.of(context).size.height * 0.25,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).primaryColor,
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black26,
@@ -805,7 +931,7 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                     child: Container(
                       padding: EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(100),
                         boxShadow: [
                           BoxShadow(
@@ -1032,6 +1158,31 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
       ),
     );
   }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // TODO: implement didChangeAppLifecycleState
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed) {
+      if (Theme.of(context).brightness == Brightness.dark) {
+        mapController.setMapStyle(_darkStyle);
+      } else {
+        mapController.setMapStyle("[]");
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    mapController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    Wakelock.disable();
+    super.dispose();
+  }
+
+  ////
 
   void selectNearbyDrivers() {
     if (availableDrivers.length == 0) {
@@ -1266,7 +1417,9 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
     setState(() {
       Polyline polyline = Polyline(
         polylineId: PolylineId('routes'),
-        color: Colors.purple,
+        color: (Theme.of(context).brightness == Brightness.dark)
+            ? Colors.white
+            : Colors.deepPurple,
         points: polylineCoords,
         jointType: JointType.round,
         width: 4,

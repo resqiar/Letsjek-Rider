@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -39,18 +40,34 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (context) => AppData(),
-      child: MaterialApp(
-        theme: ThemeData(
-          primaryColor: Colors.green,
+      child: AdaptiveTheme(
+        light: ThemeData(
+          brightness: Brightness.light,
+          primaryColor: Colors.white,
+          textSelectionColor: Colors.grey,
+          accentColor: Colors.black,
           fontFamily: 'Bolt-Regular',
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        initialRoute: (isLogin != null) ? MainPage.id : LoginPage.id,
-        routes: {
-          LoginPage.id: (context) => LoginPage(),
-          RegisterPage.id: (context) => RegisterPage(),
-          MainPage.id: (context) => MainPage()
-        },
+        dark: ThemeData(
+          brightness: Brightness.dark,
+          primarySwatch: Colors.yellow,
+          accentColor: Colors.amber,
+          textSelectionColor: Colors.white70,
+          fontFamily: 'Bolt-Regular',
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        initial: AdaptiveThemeMode.dark,
+        builder: (theme, darkTheme) => MaterialApp(
+          theme: theme,
+          darkTheme: darkTheme,
+          initialRoute: (isLogin != null) ? MainPage.id : LoginPage.id,
+          routes: {
+            LoginPage.id: (context) => LoginPage(),
+            RegisterPage.id: (context) => RegisterPage(),
+            MainPage.id: (context) => MainPage()
+          },
+        ),
       ),
     );
   }

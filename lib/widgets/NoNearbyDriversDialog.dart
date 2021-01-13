@@ -8,7 +8,7 @@ class NoNearbyDriversDialog extends StatelessWidget {
     return Dialog(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).primaryColor,
       child: Container(
         width: double.infinity,
         child: Column(
@@ -47,7 +47,11 @@ class NoNearbyDriversDialog extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: SubmitFlatButton('CLOSE', Colors.green, () {
+              child: SubmitFlatButton(
+                  'CLOSE',
+                  (Theme.of(context).brightness == Brightness.dark)
+                      ? Colors.deepPurple
+                      : Colors.deepOrange, () {
                 Navigator.pop(context);
               }),
             ),

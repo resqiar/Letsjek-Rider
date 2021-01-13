@@ -17,7 +17,7 @@ import 'package:uber_clone/global.dart';
 import 'package:http/http.dart' as http;
 
 class HttpRequestMethod {
-  static getCurrentUserData() {
+  static Future getCurrentUserData() async {
     // get current user info
     firebaseAuth = FirebaseAuth.instance;
     String currentUserId = firebaseAuth.currentUser.uid;
@@ -26,7 +26,7 @@ class HttpRequestMethod {
     DatabaseReference databaseReference =
         FirebaseDatabase.instance.reference().child('users/$currentUserId');
     // get data snapshot from DB
-    databaseReference.once().then((DataSnapshot userData) {
+    await databaseReference.once().then((DataSnapshot userData) {
       // check if its null
       if (userData != null) {
         // save to CurrentUser model

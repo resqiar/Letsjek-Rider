@@ -1,7 +1,7 @@
 class Address {
   String id;
   String rawAdress;
-  String formattedAddress;
+  String formattedAddress = ' ';
   double latitude;
   double longitude;
 

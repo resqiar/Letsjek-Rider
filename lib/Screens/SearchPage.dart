@@ -45,11 +45,17 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  String address;
+
   @override
   Widget build(BuildContext context) {
     // address from AppData
-    String address =
-        Provider.of<AppData>(context).pickupPoint.formattedAddress ?? '';
+    if (Provider.of<AppData>(context).pickupPoint.formattedAddress != null) {
+      address = Provider.of<AppData>(context).pickupPoint.formattedAddress;
+    } else {
+      address = '';
+    }
+
     pickupTextController.text = address;
 
     return Scaffold(
@@ -57,9 +63,9 @@ class _SearchPageState extends State<SearchPage> {
         child: Column(
           children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.31,
+              height: MediaQuery.of(context).size.height * 0.26,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).primaryColor,
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black26,
@@ -115,7 +121,10 @@ class _SearchPageState extends State<SearchPage> {
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.lightGreen[50],
+                              color: (Theme.of(context).brightness ==
+                                      Brightness.dark)
+                                  ? Colors.deepOrange
+                                  : Colors.orange[100],
                               borderRadius: BorderRadius.circular(100),
                             ),
                             child: Padding(
@@ -155,7 +164,10 @@ class _SearchPageState extends State<SearchPage> {
                         Expanded(
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.lightBlue[50],
+                              color: (Theme.of(context).brightness ==
+                                      Brightness.dark)
+                                  ? Colors.purple
+                                  : Colors.lightBlue[100],
                               borderRadius: BorderRadius.circular(100),
                             ),
                             child: TextField(
