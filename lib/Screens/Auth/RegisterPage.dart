@@ -97,7 +97,9 @@ class _RegisterPageState extends State<RegisterPage> {
               alignment: Alignment.center,
               height: 200,
               width: 200,
-              image: AssetImage('resources/images/icon_cropped.png'),
+              image: (Theme.of(context).brightness == Brightness.light)
+                  ? AssetImage('resources/images/icon_removed_bg.png')
+                  : AssetImage('resources/images/icon_light.png'),
             ),
             Text(
               'Sign up new rider\'s account',

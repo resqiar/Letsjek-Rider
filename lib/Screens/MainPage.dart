@@ -321,7 +321,7 @@ class _MainPageState extends State<MainPage>
                         ? CircularProgressIndicator(
                             backgroundColor: (Theme.of(context).brightness ==
                                     Brightness.dark)
-                                ? Colors.deepPurple
+                                ? Colors.amberAccent
                                 : Colors.deepOrange,
                           )
                         : Image.asset(
@@ -551,13 +551,19 @@ class _MainPageState extends State<MainPage>
                           decoration: BoxDecoration(
                             color: (Theme.of(context).brightness ==
                                     Brightness.dark)
-                                ? Colors.black38
+                                ? Theme.of(context).primaryColor
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(100),
+                            border: Border.all(
+                                color: (Theme.of(context).brightness ==
+                                        Brightness.dark)
+                                    ? Colors.white
+                                    : Colors.transparent,
+                                width: 1),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 0.8,
+                                color: Colors.black54,
+                                blurRadius: 0.5,
                                 spreadRadius: 0.5,
                                 offset: Offset(0.5, 0.5),
                               ),
@@ -570,7 +576,7 @@ class _MainPageState extends State<MainPage>
                                       backgroundColor:
                                           (Theme.of(context).brightness ==
                                                   Brightness.dark)
-                                              ? Colors.deepPurple
+                                              ? Colors.amberAccent
                                               : Colors.deepOrange,
                                     )
                                   : Icon(Icons.search, color: Colors.grey),

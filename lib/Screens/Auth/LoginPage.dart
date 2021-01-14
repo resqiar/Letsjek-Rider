@@ -78,7 +78,9 @@ class _LoginPageState extends State<LoginPage> {
               alignment: Alignment.center,
               height: 200.0,
               width: 200.0,
-              image: AssetImage('resources/images/icon_cropped.png'),
+              image: (Theme.of(context).brightness == Brightness.light)
+                  ? AssetImage('resources/images/icon_removed_bg.png')
+                  : AssetImage('resources/images/icon_light.png'),
             ),
             Text(
               'Sign in as a rider',
@@ -93,6 +95,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Column(
                 children: [
                   TextField(
+                    cursorColor: Colors.deepPurple,
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
                     style: TextStyle(fontSize: 14),
