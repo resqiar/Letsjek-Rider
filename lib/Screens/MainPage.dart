@@ -1750,6 +1750,43 @@ class _MainPageState extends State<MainPage>
         await HttpRequestMethod.findRoutes(currentCoords, destLatLng);
 
     if (getDriverInfo != null) {
+      // !: RENDER ROUTES :!
+      PolylinePoints polylinePoints = PolylinePoints();
+      List<PointLatLng> result =
+          polylinePoints.decodePolyline(getDriverInfo.encodedPoints);
+
+      // clear available RESULT first
+      polylineCoords.clear();
+
+      if (result.isNotEmpty) {
+        // LOOP RESULT + ADD to LIST
+        result.forEach((PointLatLng points) {
+          polylineCoords.add(LatLng(points.latitude, points.longitude));
+        });
+      }
+
+      // PROPERTY of POLYLINE
+      // clear available polyline first
+      _polylines.clear();
+
+      setState(() {
+        Polyline polyline = Polyline(
+          polylineId: PolylineId('routes'),
+          color: (Theme.of(context).brightness == Brightness.dark)
+              ? Colors.white
+              : Colors.deepPurple,
+          points: polylineCoords,
+          jointType: JointType.round,
+          width: 4,
+          startCap: Cap.roundCap,
+          endCap: Cap.roundCap,
+          geodesic: true,
+        );
+
+        // add to Set
+        _polylines.add(polyline);
+      });
+
       setState(() {
         tripDriverEstimatedTime = getDriverInfo.destDuration;
         tripDriverEstimatedM = getDriverInfo.destDistanceM;
