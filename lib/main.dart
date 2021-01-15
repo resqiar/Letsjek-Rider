@@ -64,7 +64,7 @@ class MyApp extends StatelessWidget {
           fontFamily: 'Bolt-Regular',
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        initial: savedThemeMode ?? AdaptiveThemeMode.dark,
+        initial: savedThemeMode ?? AdaptiveThemeMode.system,
         builder: (theme, darkTheme) => MaterialApp(
           theme: theme,
           darkTheme: darkTheme,
