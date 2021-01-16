@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
@@ -23,6 +24,7 @@ import 'package:uber_clone/models/Routes.dart';
 import 'package:uber_clone/provider/AppData.dart';
 import 'package:uber_clone/widgets/CashPaymentDialog.dart';
 import 'package:uber_clone/widgets/ConfirmLogoutDialog.dart';
+import 'package:uber_clone/widgets/CustomOutlinedButton.dart';
 import 'package:uber_clone/widgets/ListDivider.dart';
 import 'package:uber_clone/widgets/NoNearbyDriversDialog.dart';
 import 'package:uber_clone/widgets/ProgressDialogue.dart';
@@ -123,6 +125,7 @@ class _MainPageState extends State<MainPage>
   bool requestSheetHigh = false;
   bool tripSheetHigh = false;
   bool isRequesting = false;
+  double tripCompletedHeight = 0;
 
   void showRequestSheet() async {
     // GET ROUTES
@@ -1185,6 +1188,126 @@ class _MainPageState extends State<MainPage>
                   ),
                 )
               : Container(),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: AnimatedSize(
+              duration: Duration(milliseconds: 150),
+              vsync: this,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(15),
+                      topRight: Radius.circular(15)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 15.0, // soften the shadow
+                      spreadRadius: 0.5, //extend the shadow
+                      offset: Offset(
+                        0.7, // Move to right 10  horizontally
+                        0.7, // Move to bottom 10 Vertically
+                      ),
+                    )
+                  ],
+                ),
+                height: tripCompletedHeight,
+                width: double.infinity,
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Image.asset(
+                                'resources/images/taxi.png',
+                                height: 40,
+                                width: 100,
+                                fit: BoxFit.cover,
+                              ),
+                              Text(
+                                'Trip Completed',
+                                style: TextStyle(
+                                    fontFamily: 'Bolt-Semibold', fontSize: 18),
+                              ),
+                            ],
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                height: 24,
+                              ),
+                              Text(
+                                DateFormat.yMEd().format(tripDate),
+                                style: TextStyle(fontSize: 14),
+                              ),
+                              Text(
+                                tripDriverFullName,
+                                style: TextStyle(fontSize: 14),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    ListDivider(),
+                    SizedBox(height: 18),
+                    Column(
+                      children: [
+                        Text(
+                          'How was the driver?',
+                          style: TextStyle(
+                              fontSize: 22, fontFamily: 'Bolt-Semibold'),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    RatingBar.builder(
+                      initialRating: 0,
+                      minRating: 1,
+                      direction: Axis.horizontal,
+                      allowHalfRating: true,
+                      itemCount: 5,
+                      itemPadding: EdgeInsets.symmetric(horizontal: 8.0),
+                      itemBuilder: (context, _) => Icon(
+                        Icons.star_rounded,
+                        color: Colors.amber,
+                      ),
+                      onRatingUpdate: (rating) {
+                        setState(() {
+                          tripDriverStarReview = rating.toDouble();
+                        });
+                      },
+                    ),
+                    SizedBox(height: 18),
+                    CustomOutlinedButton(
+                      title: 'CONFIRM',
+                      color: Colors.deepPurpleAccent,
+                      textColor: Colors.white,
+                      fontIsBold: true,
+                      width: 350,
+                      onpress: () async {
+                        if (rideRequestKey == null) return;
+
+                        await uploadReview();
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -1579,12 +1702,20 @@ class _MainPageState extends State<MainPage>
       }
 
       if (tripStatus == 'accepted') {
+        // ! CREATED AT
+        if (event.snapshot.value['created_at'].toString() != null) {
+          setState(() {
+            tripDate =
+                DateTime.parse(event.snapshot.value['created_at'].toString());
+          });
+        }
         // ! DRIVER ID
         if (event.snapshot.value['driver_id'].toString() != 'waiting') {
           var driverID = event.snapshot.value['driver_id'].toString();
           var driverProfile = await getDriverProfile(driverID);
 
           setState(() {
+            tripDriverID = driverID;
             tripDriverProfileURL = driverProfile;
           });
         }
@@ -1685,32 +1816,32 @@ class _MainPageState extends State<MainPage>
           tripStatusText = 'You have arrived';
         });
 
-        if (event.snapshot.value['fares_price'] != null) {
-          var fares = event.snapshot.value['fares_price'];
-          String formattedFares = NumberFormat.currency(
-            locale: 'id',
-            symbol: 'IDR ',
-            decimalDigits: 0,
-          ).format(int.parse(fares));
+        // if (event.snapshot.value['fares_price'] != null) {
+        // var fares = event.snapshot.value['fares_price'];
+        // String formattedFares = NumberFormat.currency(
+        //   locale: 'id',
+        //   symbol: 'IDR ',
+        //   decimalDigits: 0,
+        // ).format(int.parse(fares));
 
-          var response = await showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (BuildContext context) =>
-                CashPaymentDialog(fares: formattedFares),
-          );
+        // var response = await showDialog(
+        //   context: context,
+        //   barrierDismissible: false,
+        //   builder: (BuildContext context) =>
+        //       CashPaymentDialog(fares: formattedFares),
+        // );
 
-          if (response == 'payed') {
-            setState(() {
-              _marker.clear();
-              polylineCoords.clear();
-              _circle.clear();
-              isLocationEnabled = true;
-            });
+        // if (response == 'payed') {
+        setState(() {
+          _marker.clear();
+          polylineCoords.clear();
+          _circle.clear();
+          isLocationEnabled = true;
+        });
 
-            resetApp();
-          }
-        }
+        resetApp();
+        // }
+        // }
       }
     });
   }
@@ -1869,11 +2000,9 @@ class _MainPageState extends State<MainPage>
 
   void resetApp() {
     setState(() {
-      searchSheetHigh = true;
       tripSheetHigh = false;
       tripStatus = '';
       tripStatusText = '';
-      tripDriverFullName = '';
       tripDriverPhoneNumber = '';
       tripDriverCarBrand = '';
       tripDriverCarPlate = '';
@@ -1883,6 +2012,26 @@ class _MainPageState extends State<MainPage>
       tripDriverEstimatedM = '';
     });
 
+    tripCompletedHeight = 320;
     getCurrentPos();
+  }
+
+  Future uploadReview() async {
+    // ! SEND TO TRIP HISTORY
+    DatabaseReference tripRef = FirebaseDatabase.instance
+        .reference()
+        .child('ride_request/$rideRequestKey/star');
+
+    await tripRef.set(tripDriverStarReview);
+
+    setState(() {
+      tripDriverStarReview = 0;
+      searchSheetHigh = true;
+      tripDate = DateTime.now();
+      tripDriverID = '';
+      tripCompletedHeight = 0;
+    });
+
+    showSnackbar('Thanks! Your stars mean a lot for the driver!');
   }
 }

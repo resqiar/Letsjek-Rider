@@ -21,7 +21,9 @@ int timerCountdown = 15;
 // TODO: MONITORING TRIP REQUEST
 StreamSubscription<Event> driverStatusRef;
 LatLng driverCoords;
+DateTime tripDate = DateTime.now();
 String tripStatus = '';
+String tripDriverID = '';
 String tripStatusText = '';
 String tripDriverFullName = '';
 String tripDriverPhoneNumber = '';
@@ -32,3 +34,4 @@ String tripDriverEstimatedTime = '';
 String tripDriverEstimatedKM = '0';
 String tripDriverEstimatedM = '';
 String tripDriverProfileURL = '';
+double tripDriverStarReview = 0;
